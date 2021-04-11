@@ -14,80 +14,94 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              prism:ViewModelLocator.AutoWireViewModel="True" Background="#F7C9C5">
     <UserControl.Resources>
-        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+        <ResourceDictionary>
+            <!-- Place for converters etc.. -->
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
     </UserControl.Resources>
-    <Grid>
-        <TabControl ItemsSource="{Binding MainTasks}" TabStripPlacement="Left" Background="#EFF1DB">
-            <TabControl.Resources>
-                <Style TargetType="TabItem">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="TabItem">
-                                <Grid Name="Panel">
-                                    <ContentPresenter x:Name="ContentSite"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        ContentSource="Header"
-                                        Margin="10,2"/>
-                                </Grid>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Panel" Property="Background" Value="#FFD4DB" />
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="False">
-                                        <Setter TargetName="Panel" Property="Background" Value="#F7C9C5" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </TabControl.Resources>
-            
-            <TabControl.ItemTemplate >
-                <DataTemplate >
-                    <TextBlock Text="{Binding Name}" FontSize="20" Width="auto" Height="auto"/>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate>
-                    <ListView ItemsSource="{Binding SubTasks}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid HorizontalAlignment="Stretch" Width="auto" Height="40">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Width="auto" Height="auto" Style="{DynamicResource MaterialDesignFlatAccentButton}" Command="">
-                                        <materialDesign:PackIcon Kind="CircleOutline" Foreground="black"/>
-                                    </Button>
-                                    <TextBox Text="{Binding Name}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto" Grid.Column="1"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
+    <Grid Background="LightPink">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer.Template>
+                <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <ScrollContentPresenter Grid.Column="1"/>
+                        <ScrollBar Name="PART_VerticalScrollBar" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Background="LightPink"/>
+                    </Grid>
+                </ControlTemplate>
+            </ScrollViewer.Template>
+            <TabControl ItemsSource="{Binding MainTasks}" TabStripPlacement="Left" Background="#EFF1DB" SelectedIndex="{Binding SelectedTabIndex}">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Grid Name="Panel">
+                                        <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="10,2"/>
+                                    </Grid>
+
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Panel" Property="Background" Value="#FFD4DB" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="False">
+                                            <Setter TargetName="Panel" Property="Background" Value="#F7C9C5" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <TabControl.ItemTemplate >
+                    <DataTemplate >
+                        <TextBox Text="{Binding Name}" FontSize="20" Width="auto" Height="auto"/>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <ListView ItemsSource="{Binding SubTasks}" SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid HorizontalAlignment="Stretch" Width="auto" Height="40">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Width="auto" Height="auto" Style="{DynamicResource MaterialDesignFlatAccentButton}" Command="">
+                                            <materialDesign:PackIcon Kind="CircleOutline" Foreground="black"/>
+                                        </Button>
+                                        <TextBox Text="{Binding Name}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto" Grid.Column="1"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+        </ScrollViewer>
         <Grid Width="auto" Height="auto" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0 0 60 60">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Margin="0 0 0 5" Command="{Binding AddMainTaskButtonEvent}">
-                <Button.Content>
-                    <Label Content="Add new Task"/>
-                </Button.Content>
-            </Button>
-            <Button Grid.Row="1" Margin="0 0 0 5">
-                <Button.Content>
-                    <Label Content="Add new SubTask"/>
-                </Button.Content>
-
-            </Button>
-            <Button Name="AddButton" FontSize="40" Height="70" Width="70" Background="Transparent" Grid.Row="2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Name="MainTaskAddButton" Content="Add new Task" Grid.Row="0" Margin="0 0 0 5" Command="{Binding AddMainTaskButtonEvent}" Visibility="{Binding IsAddTaskButtonsVisibleEvent}"/>
+                <Button Name="SubTaskAddButton" Content="Add new SubTask" Grid.Row="1" Margin="0 0 0 5" Command="{Binding AddSubTaskButtonEvent}" Visibility="{Binding IsAddTaskButtonsVisibleEvent}"/>
+            </Grid>
+            <Button Name="AddButton" FontSize="40" Height="70" Width="70" Background="Transparent" Grid.Row="2" Command="{Binding ShowAddButtonsEvent}">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Template">
@@ -108,8 +122,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            
+
         </Grid>
-        
     </Grid>
 </UserControl>

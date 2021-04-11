@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="irt dll is not used.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServicesModule.cs" />
     <Compile Include="Services\TaskManageService.cs" />

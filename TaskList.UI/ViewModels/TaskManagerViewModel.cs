@@ -1,27 +1,32 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Windows;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using TaskList.Database.Models;
+using System.Timers;
 
 namespace TaskList.UI.ViewModels
 {
     public class TaskManagerViewModel : BindableBase
     {
+        Timer _timer = new Timer(4000);
         //ctor
         public TaskManagerViewModel()
         {
 
             AddMainTaskButtonEvent = new DelegateCommand(AddMainTask);
             AddSubTaskButtonEvent = new DelegateCommand(AddSubTask);
+            ShowAddButtonsEvent = new DelegateCommand(ShowAddButtons);
+
 
             var Mcol = new ObservableCollection<MainTask>();
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 50; i++)
             {
                 var Scol = new ObservableCollection<SubTask>();
-                for (var j = 0; j < 5; j++)
+                for (var j = 0; j < 20; j++)
                 {
                     Scol.Add(new SubTask($"SubTask #{j}"));
                 }
@@ -29,9 +34,15 @@ namespace TaskList.UI.ViewModels
             }
             MainTasks = Mcol;
             Text = "123";
+            HideAddButtons();
         }
+        #region Binding commands
+
         public DelegateCommand AddMainTaskButtonEvent { get; }
         public DelegateCommand AddSubTaskButtonEvent { get; }
+        public DelegateCommand ShowAddButtonsEvent { get; }
+
+        #endregion
 
         #region Binding properties
 
@@ -41,7 +52,13 @@ namespace TaskList.UI.ViewModels
             get => _mainTasks;
             set => SetProperty(ref _mainTasks, value);
         }
-        public DelegateCommand EmployeeDetailsCommand { get; }
+
+        private Visibility _isAddTaskButtonsVisible;
+        public Visibility IsAddTaskButtonsVisibleEvent
+        {
+            get => _isAddTaskButtonsVisible;
+            set => SetProperty(ref _isAddTaskButtonsVisible, value);
+        }
 
         private string _text;
         public string Text
@@ -60,13 +77,30 @@ namespace TaskList.UI.ViewModels
 
         private void AddMainTask()
         {
-            MainTasks.Add(new MainTask("asd", new ObservableCollection<SubTask>()));
+            MainTasks.Add(new MainTask("New Task", new ObservableCollection<SubTask>()));
+            HideAddButtons();
         }
         private void AddSubTask()
         {
-            MainTasks.Add(new MainTask("asd", new ObservableCollection<SubTask>()));
+            MainTasks[SelectedTabIndex].SubTasks.Add(new SubTask("New SubTask"));
+            HideAddButtons();
+        }
+        private void ShowAddButtons()
+        {
+            IsAddTaskButtonsVisibleEvent = Visibility.Visible;
+            _timer.Enabled=true;
+            _timer.Elapsed += OnTimerElapsedEvent;
+        }
+        private void HideAddButtons()
+        {
+            IsAddTaskButtonsVisibleEvent = Visibility.Hidden;
         }
 
+        private void OnTimerElapsedEvent(Object source, ElapsedEventArgs e)
+        {
+            _timer.Enabled = false;
+            HideAddButtons();
+        }
 
     }
 }
