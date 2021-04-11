@@ -16,24 +16,18 @@ namespace TaskList.UI.ViewModels
         //ctor
         public TaskManagerViewModel()
         {
-
+            _timer.AutoReset = false;
             AddMainTaskButtonEvent = new DelegateCommand(AddMainTask);
             AddSubTaskButtonEvent = new DelegateCommand(AddSubTask);
             ShowAddButtonsEvent = new DelegateCommand(ShowAddButtons);
-
-
+            DeleteItemButtonEvent = new DelegateCommand(DeleteItemButton);
+            ResetTabIndexEvent = new DelegateCommand(ResetTabIndex);
+            ShowTabEditEvent = new DelegateCommand(ShowTabEdit);
+            HideTabEditEvent = new DelegateCommand(HideTabEdit);
+            SelectedItemIndex = -1;
             var Mcol = new ObservableCollection<MainTask>();
-            for (int i = 0; i < 50; i++)
-            {
-                var Scol = new ObservableCollection<SubTask>();
-                for (var j = 0; j < 20; j++)
-                {
-                    Scol.Add(new SubTask($"SubTask #{j}"));
-                }
-                Mcol.Add(new MainTask($"MainTask #{i}", Scol));
-            }
             MainTasks = Mcol;
-            Text = "123";
+
             HideAddButtons();
         }
         #region Binding commands
@@ -41,6 +35,10 @@ namespace TaskList.UI.ViewModels
         public DelegateCommand AddMainTaskButtonEvent { get; }
         public DelegateCommand AddSubTaskButtonEvent { get; }
         public DelegateCommand ShowAddButtonsEvent { get; }
+        public DelegateCommand DeleteItemButtonEvent { get; }
+        public DelegateCommand ResetTabIndexEvent { get; }
+        public DelegateCommand ShowTabEditEvent { get; }
+        public DelegateCommand HideTabEditEvent { get; }
 
         #endregion
 
@@ -60,12 +58,20 @@ namespace TaskList.UI.ViewModels
             set => SetProperty(ref _isAddTaskButtonsVisible, value);
         }
 
+        private Visibility _isTabEditVisible;
+        public Visibility IsTabEditVisibleEvent
+        {
+            get => _isTabEditVisible;
+            set => SetProperty(ref _isTabEditVisible, value);
+        }
+
         private string _text;
         public string Text
         {
             get => _text;
             set => SetProperty(ref _text, value);
         }
+
         private int _selectedTabIndex;
         public int SelectedTabIndex
         {
@@ -73,16 +79,26 @@ namespace TaskList.UI.ViewModels
             set => SetProperty(ref _selectedTabIndex, value);
         }
 
+        private int _selectedItemIndex;
+        public int SelectedItemIndex
+        {
+            get => _selectedItemIndex;
+            set => SetProperty(ref _selectedItemIndex, value);
+        }
+
         #endregion
 
         private void AddMainTask()
         {
-            MainTasks.Add(new MainTask("New Task", new ObservableCollection<SubTask>()));
+            SelectedTabIndex = 0;
+            SelectedItemIndex = -1;
+            MainTasks.Add(new MainTask($"New Task #{MainTasks.Count}", new ObservableCollection<SubTask>()));
             HideAddButtons();
         }
         private void AddSubTask()
         {
-            MainTasks[SelectedTabIndex].SubTasks.Add(new SubTask("New SubTask"));
+            if(SelectedTabIndex!=-1)
+                MainTasks[SelectedTabIndex].SubTasks.Add(new SubTask($"New SubTask #{MainTasks[SelectedTabIndex].SubTasks.Count}"));
             HideAddButtons();
         }
         private void ShowAddButtons()
@@ -100,6 +116,28 @@ namespace TaskList.UI.ViewModels
         {
             _timer.Enabled = false;
             HideAddButtons();
+        }
+
+        private void DeleteItemButton()
+        {
+            if (MainTasks.Count != 0)
+                if (SelectedItemIndex == -1)
+                    MainTasks.RemoveAt(SelectedTabIndex);
+                else
+                    MainTasks[SelectedTabIndex].SubTasks.RemoveAt(SelectedItemIndex);
+                
+        }
+        private void ResetTabIndex()
+        {
+            SelectedTabIndex = -1;
+        }
+        private void ShowTabEdit()
+        {
+            IsTabEditVisibleEvent = Visibility.Visible;
+        }
+        private void HideTabEdit()
+        {
+            IsTabEditVisibleEvent = Visibility.Hidden;
         }
 
     }
