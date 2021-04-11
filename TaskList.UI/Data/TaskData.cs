@@ -14,16 +14,15 @@ namespace TaskList.UI.Data
 
         public TaskData()
         {
-
-            var Mcol = new ObservableCollection<MainTask>();
-            for (int i = 0; i < 15; i++)
+            var Scol = new ObservableCollection<SubTask>();
+            for (var i = 0; i < 10; i++)
             {
-                var Scol = new ObservableCollection<SubTask>();
-                for (var j = 0; j < 5; j++)
-                {
-                    Scol.Add(new SubTask($"SubTask #{j}"));
-                }
-                Mcol.Add(new MainTask($"MainTask #{i}", Scol));
+                Scol.Add(new SubTask($"{i}"));
+            }
+            var Mcol = new ObservableCollection<MainTask>();
+            for (int i = 0; i < 10; i++)
+            {
+                Mcol.Add(new MainTask($"{i}", Scol));
             }
             MainTasks = Mcol;
         }
