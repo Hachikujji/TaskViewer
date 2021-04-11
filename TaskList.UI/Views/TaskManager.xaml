@@ -9,15 +9,41 @@
              xmlns:models="clr-namespace:TaskList.Database.Models;assembly=TaskList.Database"
              d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type local:TaskManagerViewModel}}"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="800"
+             d:DesignHeight="600" d:DesignWidth="800"
              xmlns:prism="http://prismlibrary.com/" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             prism:ViewModelLocator.AutoWireViewModel="True">
+             prism:ViewModelLocator.AutoWireViewModel="True" Background="#F7C9C5">
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
     </UserControl.Resources>
     <Grid>
-        <TabControl ItemsSource="{Binding MainTasks}" TabStripPlacement="Left" Background="Transparent">
+        <TabControl ItemsSource="{Binding MainTasks}" TabStripPlacement="Left" Background="#EFF1DB">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Grid Name="Panel">
+                                    <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Panel" Property="Background" Value="#FFD4DB" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="False">
+                                        <Setter TargetName="Panel" Property="Background" Value="#F7C9C5" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+            
             <TabControl.ItemTemplate >
                 <DataTemplate >
                     <TextBlock Text="{Binding Name}" FontSize="20" Width="auto" Height="auto"/>
@@ -28,12 +54,12 @@
                     <ListView ItemsSource="{Binding SubTasks}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid HorizontalAlignment="Stretch" Width="auto">
+                                <Grid HorizontalAlignment="Stretch" Width="auto" Height="40">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Width="auto" Height="auto" Style="{DynamicResource MaterialDesignFlatAccentButton}">
+                                    <Button Grid.Column="0" Width="auto" Height="auto" Style="{DynamicResource MaterialDesignFlatAccentButton}" Command="">
                                         <materialDesign:PackIcon Kind="CircleOutline" Foreground="black"/>
                                     </Button>
                                     <TextBox Text="{Binding Name}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto" Grid.Column="1"/>
@@ -44,5 +70,46 @@
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>
+        <Grid Width="auto" Height="auto" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0 0 60 60">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Margin="0 0 0 5" Command="{Binding AddMainTaskButtonEvent}">
+                <Button.Content>
+                    <Label Content="Add new Task"/>
+                </Button.Content>
+            </Button>
+            <Button Grid.Row="1" Margin="0 0 0 5">
+                <Button.Content>
+                    <Label Content="Add new SubTask"/>
+                </Button.Content>
+
+            </Button>
+            <Button Name="AddButton" FontSize="40" Height="70" Width="70" Background="Transparent" Grid.Row="2">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid>
+                                        <Ellipse Name="Panel" Fill="#FFB4BB" Width="auto" Height="auto" ></Ellipse>
+                                        <Label HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 10" FontSize="40" Content="+"/>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Panel" Property="Fill" Value="#F98888" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+            
+        </Grid>
+        
     </Grid>
 </UserControl>
