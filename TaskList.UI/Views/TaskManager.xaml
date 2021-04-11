@@ -16,12 +16,10 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <!-- Place for converters etc.. -->
-
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-        
     </UserControl.Resources>
 
     <Grid Background="LightPink">
@@ -38,7 +36,7 @@
                     </Grid>
                 </ControlTemplate>
             </ScrollViewer.Template>
-            <TabControl ItemsSource="{Binding MainTasks}" TabStripPlacement="Left" Background="#EFF1DB" SelectedIndex="{Binding SelectedTabIndex}">
+            <TabControl ItemsSource="{Binding MainTasks}" TabStripPlacement="Left" Background="#EFF1DB" SelectedIndex="{Binding SelectedTabIndex}" >
                 <TabControl.Resources>
                     <Style TargetType="TabItem">
                         <Setter Property="Template">
@@ -48,8 +46,6 @@
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="MouseLeftButtonDown">
                                                 <i:InvokeCommandAction Command="{Binding DataContext.ResetTabIndexEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
-                                            </i:EventTrigger>
-                                            <i:EventTrigger EventName="MouseDoubleClick">
                                                 <i:InvokeCommandAction Command="{Binding DataContext.ShowTabEditEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
                                             </i:EventTrigger>
                                             <i:EventTrigger EventName="MouseLeave">
@@ -75,8 +71,8 @@
                 <TabControl.ItemTemplate >
                     <DataTemplate >
                         <Grid>
-                            <TextBox Text="{Binding Name}" FontSize="20" Width="auto" Height="auto"/>
-                            
+                            <TextBlock Text="{Binding Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" FontSize="20" Width="auto" Height="auto" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBox Text="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" FontSize="20" Margin="1 0 0 0" Width="auto" Height="auto" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding DataContext.IsTabEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
                         </Grid>
                     </DataTemplate>
                 </TabControl.ItemTemplate>
@@ -86,14 +82,26 @@
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid HorizontalAlignment="Stretch" Width="auto" Height="40">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.ShowItemEditEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="MouseLeave">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.HideItemEditEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="auto"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
+ 
                                         <Button Grid.Column="0" Width="auto" Height="auto" Style="{DynamicResource MaterialDesignFlatAccentButton}" Command="">
                                             <materialDesign:PackIcon Kind="CircleOutline" Foreground="black"/>
                                         </Button>
-                                        <TextBox Text="{Binding Name}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto" Grid.Column="1"/>
+                                        <Grid Grid.Column="1">
+                                            <TextBlock Text="{Binding Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto"/>
+                                            <TextBox Text="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" Margin="-1 0 0 0" VerticalAlignment="Center"  Width="auto" Visibility="{Binding DataContext.IsItemEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
+                                        </Grid>
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
@@ -167,9 +175,6 @@
                 </Button>
             </Grid>
         </Grid>
-        <TextBlock Margin="660,285,110,285" Width="30" Height="30" Text="{Binding SelectedItemIndex}"/>
-        <TextBlock Margin="625,285,145,285" Width="30" Height="30" Text="{Binding SelectedTabIndex}"/>
-
     </Grid>
     
 </UserControl>

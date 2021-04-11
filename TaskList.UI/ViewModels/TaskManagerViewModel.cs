@@ -24,11 +24,15 @@ namespace TaskList.UI.ViewModels
             ResetTabIndexEvent = new DelegateCommand(ResetTabIndex);
             ShowTabEditEvent = new DelegateCommand(ShowTabEdit);
             HideTabEditEvent = new DelegateCommand(HideTabEdit);
+            HideItemEditEvent = new DelegateCommand(HideItemEdit);
+            ShowItemEditEvent = new DelegateCommand(ShowItemEdit);
             SelectedItemIndex = -1;
             var Mcol = new ObservableCollection<MainTask>();
             MainTasks = Mcol;
 
             HideAddButtons();
+            HideItemEdit();
+            HideTabEdit();
         }
         #region Binding commands
 
@@ -39,6 +43,8 @@ namespace TaskList.UI.ViewModels
         public DelegateCommand ResetTabIndexEvent { get; }
         public DelegateCommand ShowTabEditEvent { get; }
         public DelegateCommand HideTabEditEvent { get; }
+        public DelegateCommand HideItemEditEvent { get; }
+        public DelegateCommand ShowItemEditEvent { get; }
 
         #endregion
 
@@ -63,6 +69,13 @@ namespace TaskList.UI.ViewModels
         {
             get => _isTabEditVisible;
             set => SetProperty(ref _isTabEditVisible, value);
+        }
+
+        private Visibility _isItemEditVisible;
+        public Visibility IsItemEditVisibleEvent
+        {
+            get => _isItemEditVisible;
+            set => SetProperty(ref _isItemEditVisible, value);
         }
 
         private string _text;
@@ -138,6 +151,14 @@ namespace TaskList.UI.ViewModels
         private void HideTabEdit()
         {
             IsTabEditVisibleEvent = Visibility.Hidden;
+        }
+        private void ShowItemEdit()
+        {
+            IsItemEditVisibleEvent = Visibility.Visible;
+        }
+        private void HideItemEdit()
+        {
+            IsItemEditVisibleEvent = Visibility.Hidden;
         }
 
     }
