@@ -110,14 +110,20 @@ namespace TaskList.UI.ViewModels
         }
         private void AddSubTask()
         {
-            if(SelectedTabIndex!=-1)
-                MainTasks[SelectedTabIndex].SubTasks.Add(new SubTask($"New SubTask #{MainTasks[SelectedTabIndex].SubTasks.Count}"));
+            if (MainTasks.Count != 0 && SelectedTabIndex != -1)
+                    MainTasks[SelectedTabIndex].SubTasks.Add(new SubTask($"New SubTask #{MainTasks[SelectedTabIndex].SubTasks.Count}"));
+            else
+            {
+                AddMainTask();
+                AddSubTask();
+            }
             HideAddButtons();
         }
         private void ShowAddButtons()
         {
             IsAddTaskButtonsVisibleEvent = Visibility.Visible;
-            _timer.Enabled=true;
+            _timer.Start();
+            _timer.Stop();
             _timer.Elapsed += OnTimerElapsedEvent;
         }
         private void HideAddButtons()
@@ -127,7 +133,7 @@ namespace TaskList.UI.ViewModels
 
         private void OnTimerElapsedEvent(Object source, ElapsedEventArgs e)
         {
-            _timer.Enabled = false;
+            _timer.Stop();
             HideAddButtons();
         }
 

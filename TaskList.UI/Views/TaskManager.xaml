@@ -94,11 +94,7 @@
                                             <ColumnDefinition Width="auto"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
- 
-                                        <Button Grid.Column="0" Width="auto" Height="auto" Style="{DynamicResource MaterialDesignFlatAccentButton}" Command="">
-                                            <materialDesign:PackIcon Kind="CircleOutline" Foreground="black"/>
-                                        </Button>
-                                        <Grid Grid.Column="1">
+                                        <Grid Grid.Column="1" Margin="20 0 0 0">
                                             <TextBlock Text="{Binding Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto"/>
                                             <TextBox Text="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" Margin="-1 0 0 0" VerticalAlignment="Center"  Width="auto" Visibility="{Binding DataContext.IsItemEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
                                         </Grid>
@@ -175,6 +171,7 @@
                 </Button>
             </Grid>
         </Grid>
+        <TextBlock Margin="100 100 100 100" Height="30" Width="30" Text="{Binding DataContext.SelectedTabIndex,Mode=OneWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
+        <TextBlock Margin="100 140 100 100" Height="30" Width="30" Text="{Binding DataContext.SelectedItemIndex,Mode=OneWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
     </Grid>
-    
 </UserControl>
