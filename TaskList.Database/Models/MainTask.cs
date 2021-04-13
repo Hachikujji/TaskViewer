@@ -10,12 +10,10 @@ namespace TaskList.Database.Models
     public class MainTask
     {
         public string Name { get; set; }
-        public ObservableCollection<SubTask> SubTasks { get; set; }
 
-        public MainTask(string name, ObservableCollection<SubTask> subTasks)
+        public MainTask(string name)
         {
             Name = name;
-            SubTasks = subTasks;
         }
     }
 

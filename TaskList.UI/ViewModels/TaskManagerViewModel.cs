@@ -27,7 +27,7 @@ namespace TaskList.UI.ViewModels
             HideItemEditEvent = new DelegateCommand(HideItemEdit);
             ShowItemEditEvent = new DelegateCommand(ShowItemEdit);
             SelectedItemIndex = -1;
-            var Mcol = new ObservableCollection<MainTask>();
+            var Mcol = new ObservableCollection<TaskObject>();
             MainTasks = Mcol;
 
             HideAddButtons();
@@ -50,8 +50,8 @@ namespace TaskList.UI.ViewModels
 
         #region Binding properties
 
-        private ObservableCollection<MainTask> _mainTasks;
-        public ObservableCollection<MainTask> MainTasks
+        private ObservableCollection<TaskObject> _mainTasks;
+        public ObservableCollection<TaskObject> MainTasks
         {
             get => _mainTasks;
             set => SetProperty(ref _mainTasks, value);
@@ -105,13 +105,13 @@ namespace TaskList.UI.ViewModels
         {
             SelectedTabIndex = 0;
             SelectedItemIndex = -1;
-            MainTasks.Add(new MainTask($"New Task #{MainTasks.Count}", new ObservableCollection<SubTask>()));
+            MainTasks.Add(new TaskObject(new MainTask($"Maintask #{MainTasks.Count}"),new ObservableCollection<TaskObject>()));
             HideAddButtons();
         }
         private void AddSubTask()
         {
             if (MainTasks.Count != 0 && SelectedTabIndex != -1)
-                    MainTasks[SelectedTabIndex].SubTasks.Add(new SubTask($"New SubTask #{MainTasks[SelectedTabIndex].SubTasks.Count}"));
+                    MainTasks[SelectedTabIndex].SubTasks.Add(new TaskObject(new MainTask($"Subtask #{MainTasks[SelectedTabIndex].SubTasks.Count}"), new ObservableCollection<TaskObject>()));
             else
             {
                 AddMainTask();

@@ -71,8 +71,8 @@
                 <TabControl.ItemTemplate >
                     <DataTemplate >
                         <Grid>
-                            <TextBlock Text="{Binding Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" FontSize="20" Width="auto" Height="auto" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBox Text="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" FontSize="20" Margin="1 0 0 0" Width="auto" Height="auto" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding DataContext.IsTabEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
+                            <TextBlock Text="{Binding Task.Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" FontSize="20" Width="auto" Height="auto" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBox Text="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" FontSize="20" Margin="1 0 0 0" Width="auto" Height="auto" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding DataContext.IsTabEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
                         </Grid>
                     </DataTemplate>
                 </TabControl.ItemTemplate>
@@ -95,8 +95,8 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid Grid.Column="1" Margin="20 0 0 0">
-                                            <TextBlock Text="{Binding Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto"/>
-                                            <TextBox Text="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" Margin="-1 0 0 0" VerticalAlignment="Center"  Width="auto" Visibility="{Binding DataContext.IsItemEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
+                                            <TextBlock Text="{Binding Task.Name,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" VerticalAlignment="Center"  Width="auto"/>
+                                            <TextBox Text="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" FontSize="15" Margin="-1 0 0 0" VerticalAlignment="Center"  Width="auto" Visibility="{Binding DataContext.IsItemEditVisibleEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
                                         </Grid>
                                     </Grid>
                                 </DataTemplate>
