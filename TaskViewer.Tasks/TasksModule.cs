@@ -17,7 +17,7 @@ namespace TaskViewer.Tasks
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<TasksWindow>();
-            //containerRegistry.RegisterSingleton<IDatabaseService, DatabaseService>();
+            containerRegistry.RegisterSingleton<IDatabaseService, DatabaseService>();
         }
     }
 }

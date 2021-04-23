@@ -1,7 +1,11 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Timers;
+using System.Windows;
+using System.Windows.Controls;
 using TaskViewer.Database.Models;
 using TaskViewer.Database.Services;
 using TaskViewer.Tasks.Models;
@@ -12,7 +16,7 @@ namespace TaskViewer.Tasks.ViewModels
     {
         #region Private Fields
 
-        private IDatabaseService _databaseService = new DatabaseService();
+        private IDatabaseService _databaseService;
         private int _currentUserId;
         private int _headerSelectedTabIndex;
         private int _selectedListItemIndex;
@@ -22,48 +26,52 @@ namespace TaskViewer.Tasks.ViewModels
         private string _addTaskName;
         private string _password;
         private string _username;
+        private string _authorizationErrorLog;
+        private Visibility _authorizationErrorLogVisibility;
+        private Timer _authorizationErrorLogTimer;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public TasksWindowViewModel()
+        public TasksWindowViewModel(IDatabaseService databaseService)
         {
-            TestButtonEvent = new DelegateCommand(TestButton);
+            _databaseService = databaseService;
             OpenSubTaskTabEvent = new DelegateCommand(OpenSubTaskTab);
             UpdateTaskAfterEditingEvent = new DelegateCommand(UpdateTaskAfterEditing);
             AddTaskEvent = new DelegateCommand(AddTask);
             DeleteTaskEvent = new DelegateCommand(DeleteTask);
             DeleteTaskTabEvent = new DelegateCommand(DeleteTaskTab);
-            LogInButtonEvent = new DelegateCommand(LogInButton);
+            LogInButtonEvent = new DelegateCommand<object>(LogInButton);
             RegistrationButtonEvent = new DelegateCommand(RegistrationButton);
             SelectedTabItemIndex = -1;
             SelectedListItemIndex = -1;
+            _authorizationErrorLogTimer = new Timer(2000);
+            _authorizationErrorLogTimer.AutoReset = false;
+            _authorizationErrorLogTimer.Elapsed += TimerElapsedEvent;
+            AuthorizationErrorLogVisibility = Visibility.Hidden;
         }
 
         #endregion Public Constructors
 
         #region Public Properties
 
-        public DelegateCommand AddTaskEvent { get; }
+        #region Authorization
 
-        public string AddTaskName
+        public Visibility AuthorizationErrorLogVisibility
         {
-            get => _addTaskName;
-            set => SetProperty(ref _addTaskName, value);
+            get => _authorizationErrorLogVisibility;
+            set => SetProperty(ref _authorizationErrorLogVisibility, value);
         }
 
-        public DelegateCommand DeleteTaskEvent { get; }
-        public DelegateCommand DeleteTaskTabEvent { get; }
-
-        public int HeaderSelectedTabIndex
+        public string AuthorizationErrorLog
         {
-            get => _headerSelectedTabIndex;
-            set => SetProperty(ref _headerSelectedTabIndex, value);
+            get => _authorizationErrorLog;
+            set => SetProperty(ref _authorizationErrorLog, value);
         }
 
-        public DelegateCommand LogInButtonEvent { get; }
-        public DelegateCommand OpenSubTaskTabEvent { get; }
+        public DelegateCommand<object> LogInButtonEvent { get; }
+        public DelegateCommand RegistrationButtonEvent { get; }
 
         public string Password
         {
@@ -71,7 +79,40 @@ namespace TaskViewer.Tasks.ViewModels
             set => SetProperty(ref _password, value);
         }
 
-        public DelegateCommand RegistrationButtonEvent { get; }
+        public string Username
+        {
+            get => _username;
+            set => SetProperty(ref _username, value);
+        }
+
+        #endregion Authorization
+
+        public DelegateCommand UpdateTaskAfterEditingEvent { get; }
+        public DelegateCommand TestButtonEvent { get; }
+        public DelegateCommand AddTaskEvent { get; }
+
+        public DelegateCommand DeleteTaskEvent { get; }
+
+        public DelegateCommand DeleteTaskTabEvent { get; }
+        public DelegateCommand OpenSubTaskTabEvent { get; }
+
+        public ObservableCollection<TaskObject> TabTaskList
+        {
+            get => _tabTaskList;
+            set => SetProperty(ref _tabTaskList, value);
+        }
+
+        public string AddTaskName
+        {
+            get => _addTaskName;
+            set => SetProperty(ref _addTaskName, value);
+        }
+
+        public int HeaderSelectedTabIndex
+        {
+            get => _headerSelectedTabIndex;
+            set => SetProperty(ref _headerSelectedTabIndex, value);
+        }
 
         public int SelectedListItemIndex
         {
@@ -85,24 +126,63 @@ namespace TaskViewer.Tasks.ViewModels
             set => SetProperty(ref _selectedTabItemIndex, value);
         }
 
-        public ObservableCollection<TaskObject> TabTaskList
-        {
-            get => _tabTaskList;
-            set => SetProperty(ref _tabTaskList, value);
-        }
-
-        public DelegateCommand TestButtonEvent { get; }
-        public DelegateCommand UpdateTaskAfterEditingEvent { get; }
-
-        public string Username
-        {
-            get => _username;
-            set => SetProperty(ref _username, value);
-        }
-
         #endregion Public Properties
 
         #region Private Methods
+
+        #region Authorization
+
+        private void LogInButton(object passBox)
+        {
+            int id;
+            string password = (passBox as PasswordBox).Password;
+            if ((id = _databaseService.IsUserPasswordCorrect(Username, password)) != -1)
+            {
+                CreateTasksTabTemplate();
+                _currentUserId = id;
+                HeaderSelectedTabIndex = 1;
+                Password = "";
+                _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
+                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
+                CloseAllSubTabs();
+            }
+            else
+            {
+                AuthorizationErrorLog = "Wrong username or password.";
+                AuthorizationErrorLogVisibility = Visibility.Visible;
+                _authorizationErrorLogTimer.Start();
+            }
+        }
+
+        private void RegistrationButton()
+        {
+            if (_databaseService.IsUserExists(Username) == false)
+            {
+                CreateTasksTabTemplate();
+                var user = new User(Username, Password);
+                _databaseService.AddUserAsync(user);
+                HeaderSelectedTabIndex = 1;
+                Password = "";
+                _currentUserId = user.Id;
+                _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
+                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
+                CloseAllSubTabs();
+            }
+            else
+            {
+                AuthorizationErrorLog = "This username already exists";
+                AuthorizationErrorLogVisibility = Visibility.Visible;
+                _authorizationErrorLogTimer.Start();
+            }
+        }
+
+        private void TimerElapsedEvent(object sender, ElapsedEventArgs e)
+        {
+            AuthorizationErrorLogVisibility = Visibility.Hidden;
+            _authorizationErrorLogTimer.Stop();
+        }
+
+        #endregion Authorization
 
         private void AddTask()
         {
@@ -112,14 +192,6 @@ namespace TaskViewer.Tasks.ViewModels
                 _databaseService.AddTaskAsync(task);
                 _tasklist.Add(task);
                 TabTaskList[SelectedTabItemIndex].SubTasks.Add(new TaskObject(task, new ObservableCollection<TaskObject>()));
-            }
-        }
-
-        private void CloseAllSubTabs()
-        {
-            for (int i = TabTaskList.Count - 1; i > 0; i--)
-            {
-                TabTaskList.RemoveAt(i);
             }
         }
 
@@ -150,12 +222,12 @@ namespace TaskViewer.Tasks.ViewModels
                 {
                     DeleteAllTaskRoot(ref taskList, item);
                     _databaseService.RemoveTaskAsync(item);
-                    DeleteRefTabs(item);
+                    DeleteReferencedTabs(item);
                 }
             }
         }
 
-        private void DeleteRefTabs(Task task)
+        private void DeleteReferencedTabs(Task task)
         {
             List<TaskObject> deleteTabList = new List<TaskObject>();
             foreach (var tab in TabTaskList)
@@ -177,7 +249,7 @@ namespace TaskViewer.Tasks.ViewModels
                 DeleteAllTaskRoot(ref _tasklist, task);
                 _databaseService.RemoveTaskAsync(task);
                 TabTaskList[SelectedTabItemIndex].SubTasks.RemoveAt(SelectedListItemIndex);
-                DeleteRefTabs(task);
+                DeleteReferencedTabs(task);
             }
         }
 
@@ -189,21 +261,6 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
-        private void LogInButton()
-        {
-            int id;
-            if ((id = _databaseService.IsUserPasswordCorrect(Username, Password)) != -1)
-            {
-                CreateTasksTabTemplate();
-                _currentUserId = id;
-                HeaderSelectedTabIndex = 1;
-                Password = "";
-                _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
-                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
-                CloseAllSubTabs();
-            }
-        }
-
         private void OpenSubTaskTab()
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
@@ -212,30 +269,17 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
-        private void RegistrationButton()
-        {
-            if (_databaseService.IsUserExists(Username) == false)
-            {
-                CreateTasksTabTemplate();
-                var user = new User(Username, Password);
-                _databaseService.AddUserAsync(user);
-                HeaderSelectedTabIndex = 1;
-                Password = "";
-                _currentUserId = user.Id;
-                _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
-                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
-                CloseAllSubTabs();
-            }
-        }
-
-        private void TestButton()
-        {
-            System.Console.WriteLine("TEST BUTTON");
-        }
-
         private void UpdateTaskAfterEditing()
         {
             _databaseService.UpdateTaskAsync(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task);
+        }
+
+        private void CloseAllSubTabs()
+        {
+            for (int i = TabTaskList.Count - 1; i > 0; i--)
+            {
+                TabTaskList.RemoveAt(i);
+            }
         }
 
         #endregion Private Methods

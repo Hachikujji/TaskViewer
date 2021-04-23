@@ -6,9 +6,6 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:data="clr-namespace:TaskViewer.Tasks.TestData"
-             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type data:TestData}}"
-             mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="700"
              prism:ViewModelLocator.AutoWireViewModel="True"
              MinHeight="700" MinWidth="700"
              x:Name="Window">
@@ -40,17 +37,17 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Content="Password:" Height="30" />
-                            <TextBox Grid.Column="1" Text="{Binding Password,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                            <PasswordBox Grid.Column="1" MaxLength="64" PasswordChar="*" Name="Passwordbox" />
                         </Grid>
                         <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="Log in" Command="{Binding LogInButtonEvent}" />
-                            <Button Grid.Column="1" Content="Registration" Command="{Binding RegistrationButtonEvent}" />
+                            <Button Grid.Column="0" Content="Log in" Command="{Binding LogInButtonEvent}"  CommandParameter="{Binding ElementName=Passwordbox}" />
+                            <Button Grid.Column="1" Content="Registration" Command="{Binding RegistrationButtonEvent}"  CommandParameter="{Binding ElementName=Passwordbox}" />
                         </Grid>
-                        <TextBlock Grid.Row="3" Text="{Binding }" Visibility="{Binding }" Foreground="Red" HorizontalAlignment="Center"></TextBlock>
+                        <TextBlock Grid.Row="3" Text="{Binding AuthorizationErrorLog,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding AuthorizationErrorLogVisibility,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Foreground="Red" HorizontalAlignment="Center"></TextBlock>
                     </Grid>
                 </StackPanel>
             </TabItem>
