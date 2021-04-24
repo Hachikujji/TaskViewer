@@ -20,9 +20,12 @@ namespace TaskViewer.Tasks.Views
     /// </summary>
     public partial class TasksWindow : UserControl
     {
+        public static UserControl UserControl { get; set; }
+
         public TasksWindow()
         {
             InitializeComponent();
+            UserControl = this.Window;
         }
     }
 }

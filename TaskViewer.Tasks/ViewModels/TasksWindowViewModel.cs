@@ -1,14 +1,21 @@
-﻿using Prism.Commands;
+﻿using Microsoft.Xaml.Behaviors;
+using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using TaskViewer.Database.Models;
 using TaskViewer.Database.Services;
 using TaskViewer.Tasks.Models;
+using TaskViewer.Tasks.Resources;
+using TaskViewer.Tasks.Views;
+using Timer = System.Timers.Timer;
 
 namespace TaskViewer.Tasks.ViewModels
 {
@@ -24,11 +31,12 @@ namespace TaskViewer.Tasks.ViewModels
         private List<Task> _tasklist = new List<Task>();
         private ObservableCollection<TaskObject> _tabTaskList;
         private string _addTaskName;
-        private string _password;
         private string _username;
         private string _authorizationErrorLog;
         private Visibility _authorizationErrorLogVisibility;
         private Timer _authorizationErrorLogTimer;
+        private Dictionary<string, CultureInfo> _languages;
+        private KeyValuePair<string, CultureInfo> _selectedLanguage;
 
         #endregion Private Fields
 
@@ -39,17 +47,28 @@ namespace TaskViewer.Tasks.ViewModels
             _databaseService = databaseService;
             OpenSubTaskTabEvent = new DelegateCommand(OpenSubTaskTab);
             UpdateTaskAfterEditingEvent = new DelegateCommand(UpdateTaskAfterEditing);
+            LanguageChangedEvent = new DelegateCommand<object>(LanguageChanged);
             AddTaskEvent = new DelegateCommand(AddTask);
             DeleteTaskEvent = new DelegateCommand(DeleteTask);
             DeleteTaskTabEvent = new DelegateCommand(DeleteTaskTab);
             LogInButtonEvent = new DelegateCommand<object>(LogInButton);
-            RegistrationButtonEvent = new DelegateCommand(RegistrationButton);
+            RegistrationButtonEvent = new DelegateCommand<object>(RegistrationButton);
             SelectedTabItemIndex = -1;
             SelectedListItemIndex = -1;
             _authorizationErrorLogTimer = new Timer(2000);
             _authorizationErrorLogTimer.AutoReset = false;
             _authorizationErrorLogTimer.Elapsed += TimerElapsedEvent;
             AuthorizationErrorLogVisibility = Visibility.Hidden;
+
+            _languages = new Dictionary<string, CultureInfo>
+            {
+                {
+                    "Русский", new CultureInfo("ru-RU", false)
+                },
+                {
+                    "English", new CultureInfo("en-US", false)
+                }
+            };
         }
 
         #endregion Public Constructors
@@ -71,13 +90,7 @@ namespace TaskViewer.Tasks.ViewModels
         }
 
         public DelegateCommand<object> LogInButtonEvent { get; }
-        public DelegateCommand RegistrationButtonEvent { get; }
-
-        public string Password
-        {
-            get => _password;
-            set => SetProperty(ref _password, value);
-        }
+        public DelegateCommand<object> RegistrationButtonEvent { get; }
 
         public string Username
         {
@@ -88,6 +101,7 @@ namespace TaskViewer.Tasks.ViewModels
         #endregion Authorization
 
         public DelegateCommand UpdateTaskAfterEditingEvent { get; }
+        public DelegateCommand<object> LanguageChangedEvent { get; }
         public DelegateCommand TestButtonEvent { get; }
         public DelegateCommand AddTaskEvent { get; }
 
@@ -95,6 +109,18 @@ namespace TaskViewer.Tasks.ViewModels
 
         public DelegateCommand DeleteTaskTabEvent { get; }
         public DelegateCommand OpenSubTaskTabEvent { get; }
+
+        public Dictionary<string, CultureInfo> Languages
+        {
+            get => _languages;
+            set => SetProperty(ref _languages, value);
+        }
+
+        public KeyValuePair<string, CultureInfo> SelectedLanguage
+        {
+            get => _selectedLanguage;
+            set => SetProperty(ref _selectedLanguage, value);
+        }
 
         public ObservableCollection<TaskObject> TabTaskList
         {
@@ -141,7 +167,6 @@ namespace TaskViewer.Tasks.ViewModels
                 CreateTasksTabTemplate();
                 _currentUserId = id;
                 HeaderSelectedTabIndex = 1;
-                Password = "";
                 _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
                 ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
                 CloseAllSubTabs();
@@ -154,15 +179,15 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
-        private void RegistrationButton()
+        private void RegistrationButton(object passBox)
         {
+            string password = (passBox as PasswordBox).Password;
             if (_databaseService.IsUserExists(Username) == false)
             {
                 CreateTasksTabTemplate();
-                var user = new User(Username, Password);
+                var user = new User(Username, password);
                 _databaseService.AddUserAsync(user);
                 HeaderSelectedTabIndex = 1;
-                Password = "";
                 _currentUserId = user.Id;
                 _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
                 ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
@@ -272,6 +297,15 @@ namespace TaskViewer.Tasks.ViewModels
         private void UpdateTaskAfterEditing()
         {
             _databaseService.UpdateTaskAsync(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task);
+        }
+
+        private void LanguageChanged(object userControl)
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo(SelectedLanguage.Value.Name);
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(SelectedLanguage.Value.Name);
+
+            CultureInfo cultureInfo = new CultureInfo(SelectedLanguage.Value.Name);
+            CultureResources.ChangeCulture(cultureInfo);
         }
 
         private void CloseAllSubTabs()
