@@ -8,6 +8,8 @@ namespace TaskViewer.Database.Services
     {
         bool IsUserExists(string username);
 
+        int GetUserId(string username);
+
         System.Threading.Tasks.Task AddTaskAsync(Models.Task task);
 
         System.Threading.Tasks.Task AddUserAsync(User user);
@@ -16,7 +18,7 @@ namespace TaskViewer.Database.Services
 
         Task<List<Models.Task>> GetTaskListAsync(int id);
 
-        int IsUserPasswordCorrect(string username, string password);
+        bool IsUserPasswordCorrect(string username, string password);
 
         System.Threading.Tasks.Task UpdateTaskAsync(Models.Task task);
     }

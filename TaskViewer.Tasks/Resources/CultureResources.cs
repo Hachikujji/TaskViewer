@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Data;
 using TaskViewer.Tasks.Resources;
 using TaskViewer.Tasks.Views;
@@ -32,12 +33,8 @@ namespace TaskViewer.Tasks.Resources
         /// Change the current culture used in the application.
         /// If the desired culture is available all localized elements are updated.
         /// </summary>
-        /// <param name="culture">Culture to change to</param>
         public static void ChangeCulture(CultureInfo culture)
         {
-            ////remain on the current culture if the desired culture cannot be found
-            //// - otherwise it would revert to the default resources set, which may or may not be desired.
-
             languages.Culture = culture;
             ResourceProvider.Refresh();
         }

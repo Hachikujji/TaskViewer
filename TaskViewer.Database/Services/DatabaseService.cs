@@ -10,40 +10,65 @@ namespace TaskViewer.Database.Services
 {
     public class DatabaseService : IDatabaseService
     {
+        #region Public Methods
 
-
+        /// <summary>
+        /// Is user with that username exists
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>true or false</returns>
         public bool IsUserExists(string username)
         {
             using (TaskViewerEntities entities = new TaskViewerEntities())
             {
                 var user = entities.Users.SingleOrDefault(s => s.Username == username);
-                if (user==null)
+                if (user == null)
                     return false;
                 else
                     return true;
             }
-
-
-            
         }
-        
-        public int IsUserPasswordCorrect(string username,string password)
+
+        /// <summary>
+        /// Is password for that username correct
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns> <br>true if correct</br> <br>false if not correct</br></returns>
+        public bool IsUserPasswordCorrect(string username, string password)
         {
             using (TaskViewerEntities entities = new TaskViewerEntities())
             {
                 var user = entities.Users.SingleOrDefault(s => s.Username == username && s.Password == password);
                 if (user == null)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Get user id by username
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns><br>User.id if user found</br> <br>-1 if user not found</br> </returns>
+        public int GetUserId(string username)
+        {
+            using (TaskViewerEntities entities = new TaskViewerEntities())
+            {
+                var user = entities.Users.SingleOrDefault(s => s.Username == username);
+                if (user == null)
                     return -1;
                 else
                     return user.Id;
             }
-
-
-            
         }
 
-      
-
+        /// <summary>
+        /// Add new User
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.Task AddUserAsync(User user)
         {
             using (TaskViewerEntities entities = new TaskViewerEntities())
@@ -53,6 +78,11 @@ namespace TaskViewer.Database.Services
             }
         }
 
+        /// <summary>
+        /// Get list of all user tasks
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>List of tasks</returns>
         public async Task<List<Models.Task>> GetTaskListAsync(int id)
         {
             var list = new List<Models.Task>();
@@ -63,6 +93,10 @@ namespace TaskViewer.Database.Services
             }
         }
 
+        /// <summary>
+        /// Add new task
+        /// </summary>
+        /// <param name="task"></param>
         public async System.Threading.Tasks.Task AddTaskAsync(Models.Task task)
         {
             using (TaskViewerEntities entities = new TaskViewerEntities())
@@ -72,6 +106,11 @@ namespace TaskViewer.Database.Services
             }
         }
 
+        /// <summary>
+        /// Removes task
+        /// </summary>
+        /// <param name="task"></param>
+        ///
         public async System.Threading.Tasks.Task RemoveTaskAsync(Models.Task task)
         {
             using (TaskViewerEntities entities = new TaskViewerEntities())
@@ -82,6 +121,10 @@ namespace TaskViewer.Database.Services
             }
         }
 
+        /// <summary>
+        /// Update task
+        /// </summary>
+        /// <param name="task"></param>
         public async System.Threading.Tasks.Task UpdateTaskAsync(Models.Task task)
         {
             using (TaskViewerEntities entities = new TaskViewerEntities())
@@ -95,5 +138,6 @@ namespace TaskViewer.Database.Services
             }
         }
 
+        #endregion Public Methods
     }
 }

@@ -23,19 +23,49 @@ namespace TaskViewer.Tasks.ViewModels
     {
         #region Private Fields
 
+        // How long will the error be seen
+        private readonly int _timerDuration;
+
+        // Error visibility timer
+        private readonly Timer _authorizationErrorLogTimer;
+
+        // db services
         private IDatabaseService _databaseService;
+
+        // id of logged user
         private int _currentUserId;
+
+        // selected tab of [ Authorization | Tasks ] TabControl
         private int _headerSelectedTabIndex;
+
+        // selected task index in task list
         private int _selectedListItemIndex;
+
+        // selected tab index
         private int _selectedTabItemIndex;
+
+        // list of all user tasks
         private List<Task> _tasklist = new List<Task>();
+
+        // task tree
         private ObservableCollection<TaskObject> _tabTaskList;
+
+        // Name textbox field
         private string _addTaskName;
+
+        // Authorization username textbox field
         private string _username;
+
+        // Authorization error message
         private string _authorizationErrorLog;
+
+        // Visibility of authorization error message
         private Visibility _authorizationErrorLogVisibility;
-        private Timer _authorizationErrorLogTimer;
+
+        // Languages dictionary
         private Dictionary<string, CultureInfo> _languages;
+
+        // Selected language
         private KeyValuePair<string, CultureInfo> _selectedLanguage;
 
         #endregion Private Fields
@@ -47,15 +77,16 @@ namespace TaskViewer.Tasks.ViewModels
             _databaseService = databaseService;
             OpenSubTaskTabEvent = new DelegateCommand(OpenSubTaskTab);
             UpdateTaskAfterEditingEvent = new DelegateCommand(UpdateTaskAfterEditing);
-            LanguageChangedEvent = new DelegateCommand<object>(LanguageChanged);
+            LanguageChangedEvent = new DelegateCommand(LanguageChanged);
             AddTaskEvent = new DelegateCommand(AddTask);
             DeleteTaskEvent = new DelegateCommand(DeleteTask);
             DeleteTaskTabEvent = new DelegateCommand(DeleteTaskTab);
             LogInButtonEvent = new DelegateCommand<object>(LogInButton);
             RegistrationButtonEvent = new DelegateCommand<object>(RegistrationButton);
+            _timerDuration = 3000;
             SelectedTabItemIndex = -1;
             SelectedListItemIndex = -1;
-            _authorizationErrorLogTimer = new Timer(2000);
+            _authorizationErrorLogTimer = new Timer(_timerDuration);
             _authorizationErrorLogTimer.AutoReset = false;
             _authorizationErrorLogTimer.Elapsed += TimerElapsedEvent;
             AuthorizationErrorLogVisibility = Visibility.Hidden;
@@ -101,7 +132,7 @@ namespace TaskViewer.Tasks.ViewModels
         #endregion Authorization
 
         public DelegateCommand UpdateTaskAfterEditingEvent { get; }
-        public DelegateCommand<object> LanguageChangedEvent { get; }
+        public DelegateCommand LanguageChangedEvent { get; }
         public DelegateCommand TestButtonEvent { get; }
         public DelegateCommand AddTaskEvent { get; }
 
@@ -158,12 +189,19 @@ namespace TaskViewer.Tasks.ViewModels
 
         #region Authorization
 
-        private void LogInButton(object passBox)
+        /// <summary>
+        /// Action when login button pressed
+        /// </summary>
+        /// <param name="PasswordBox"></param>
+        private void LogInButton(object PasswordBox)
         {
+            string password = (PasswordBox as PasswordBox).Password;
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
+                return;
             int id;
-            string password = (passBox as PasswordBox).Password;
-            if ((id = _databaseService.IsUserPasswordCorrect(Username, password)) != -1)
+            if (_databaseService.IsUserPasswordCorrect(Username, password) != false)
             {
+                id = _databaseService.GetUserId(Username);
                 CreateTasksTabTemplate();
                 _currentUserId = id;
                 HeaderSelectedTabIndex = 1;
@@ -173,15 +211,21 @@ namespace TaskViewer.Tasks.ViewModels
             }
             else
             {
-                AuthorizationErrorLog = "Wrong username or password.";
+                AuthorizationErrorLog = languages.LoginError;
                 AuthorizationErrorLogVisibility = Visibility.Visible;
                 _authorizationErrorLogTimer.Start();
             }
         }
 
-        private void RegistrationButton(object passBox)
+        /// <summary>
+        /// Action when registration button pressed
+        /// </summary>
+        /// <param name="PasswordBox"></param>
+        private void RegistrationButton(object PasswordBox)
         {
-            string password = (passBox as PasswordBox).Password;
+            string password = (PasswordBox as PasswordBox).Password;
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
+                return;
             if (_databaseService.IsUserExists(Username) == false)
             {
                 CreateTasksTabTemplate();
@@ -195,12 +239,17 @@ namespace TaskViewer.Tasks.ViewModels
             }
             else
             {
-                AuthorizationErrorLog = "This username already exists";
+                AuthorizationErrorLog = languages.RegistrationError;
                 AuthorizationErrorLogVisibility = Visibility.Visible;
                 _authorizationErrorLogTimer.Start();
             }
         }
 
+        /// <summary>
+        /// Action when timer elapsed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TimerElapsedEvent(object sender, ElapsedEventArgs e)
         {
             AuthorizationErrorLogVisibility = Visibility.Hidden;
@@ -209,6 +258,9 @@ namespace TaskViewer.Tasks.ViewModels
 
         #endregion Authorization
 
+        /// <summary>
+        /// Add new task button
+        /// </summary>
         private void AddTask()
         {
             if (SelectedTabItemIndex >= 0)
@@ -220,6 +272,12 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Create task tree from task list
+        /// </summary>
+        /// <param name="taskList"></param>
+        /// <param name="taskObjects"></param>
+        /// <param name="mainTaskId"></param>
         private void ConvertTaskListToTaskObjectObservableCol(ref List<Task> taskList, ObservableCollection<TaskObject> taskObjects, int mainTaskId = 0)
         {
             foreach (var item in taskList)
@@ -233,12 +291,20 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Create clear list of tasks for new logged user
+        /// </summary>
         private void CreateTasksTabTemplate()
         {
             TabTaskList = new ObservableCollection<TaskObject>();
-            TabTaskList.Add(new TaskObject(new Task(_currentUserId, "Tasks", 0), new ObservableCollection<TaskObject>()));
+            TabTaskList.Add(new TaskObject(new Task(_currentUserId, "🏠", 0), new ObservableCollection<TaskObject>()));
         }
 
+        /// <summary>
+        /// Delete all task root
+        /// </summary>
+        /// <param name="taskList"> Task list</param>
+        /// <param name="task"> task </param>
         private void DeleteAllTaskRoot(ref List<Task> taskList, Task task)
         {
             foreach (var item in taskList)
@@ -252,6 +318,10 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Close all tabs of deleted tasks
+        /// </summary>
+        /// <param name="task"></param>
         private void DeleteReferencedTabs(Task task)
         {
             List<TaskObject> deleteTabList = new List<TaskObject>();
@@ -266,6 +336,9 @@ namespace TaskViewer.Tasks.ViewModels
                 TabTaskList.Remove(delTask);
         }
 
+        /// <summary>
+        /// Delete task context menu
+        /// </summary>
         private void DeleteTask()
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
@@ -278,6 +351,9 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Close tab button(image)
+        /// </summary>
         private void DeleteTaskTab()
         {
             if (SelectedTabItemIndex >= 1)
@@ -286,6 +362,9 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Open Subtask context menu button.
+        /// </summary>
         private void OpenSubTaskTab()
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
@@ -294,12 +373,18 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Action when task was edited
+        /// </summary>
         private void UpdateTaskAfterEditing()
         {
             _databaseService.UpdateTaskAsync(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task);
         }
 
-        private void LanguageChanged(object userControl)
+        /// <summary>
+        /// Action when other language was chosen
+        /// </summary>
+        private void LanguageChanged()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo(SelectedLanguage.Value.Name);
             Thread.CurrentThread.CurrentUICulture = new CultureInfo(SelectedLanguage.Value.Name);
@@ -308,6 +393,9 @@ namespace TaskViewer.Tasks.ViewModels
             CultureResources.ChangeCulture(cultureInfo);
         }
 
+        /// <summary>
+        /// Remove all tabs when task tree was created.
+        /// </summary>
         private void CloseAllSubTabs()
         {
             for (int i = TabTaskList.Count - 1; i > 0; i--)

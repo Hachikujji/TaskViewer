@@ -54,70 +54,73 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="{Binding Path=Tasks, Source={StaticResource Resources}}">
-                <TabControl ItemsSource="{Binding TabTaskList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectedIndex="{Binding DataContext.SelectedTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Height="auto" Tag="{Binding ElementName=Window}">
-                    <TabControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Orientation="Horizontal" Height="21"  Width="auto" HorizontalAlignment="Stretch">
-                                    <TextBlock Width="auto" Text="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                    <Image Source="C:\Users\hachi\source\repos\TaskViewer\TaskViewer.Tasks\close.png" Width="15" Height="15" VerticalAlignment="Center" Margin="10 0 0 0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+
+                    <TabControl Grid.Row="0" ItemsSource="{Binding TabTaskList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectedIndex="{Binding DataContext.SelectedTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Height="auto" Tag="{Binding ElementName=Window}">
+                        <TabControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal" Height="21"  Width="auto" HorizontalAlignment="Stretch">
+                                        <TextBlock Width="auto" Text="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                        <Image Source="C:\Users\hachi\source\repos\TaskViewer\TaskViewer.Tasks\close.png" Width="15" Height="15" VerticalAlignment="Center" Margin="10 0 0 0">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                                    <i:InvokeCommandAction Command="{Binding DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </Image>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                        <TabControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{Binding Path=Delete, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" CommandParameter="{Binding DataContext}" />
+                            </ContextMenu>
+                        </TabControl.ContextMenu>
+                        <TabControl.ContentTemplate>
+                            <ItemContainerTemplate>
+                                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <DataGrid CanUserDeleteRows="False" CanUserSortColumns="False" ItemsSource="{Binding SubTasks}" Tag="{Binding ElementName=Window}" AutoGenerateColumns="False" SelectedIndex="{Binding DataContext.SelectedListItemIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
                                         <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
-                                                <i:InvokeCommandAction Command="{Binding DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                                            <i:EventTrigger EventName="RowEditEnding">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
-                                    </Image>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </TabControl.ItemTemplate>
-                    <TabControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="{Binding Path=Delete, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" CommandParameter="{Binding DataContext}" />
-                        </ContextMenu>
-                    </TabControl.ContextMenu>
-                    <TabControl.ContentTemplate>
-                        <ItemContainerTemplate>
-                            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="auto" />
-                                </Grid.RowDefinitions>
-                                <DataGrid CanUserDeleteRows="False" CanUserSortColumns="False" Grid.Row="0" ItemsSource="{Binding SubTasks}" Tag="{Binding ElementName=Window}" AutoGenerateColumns="False" SelectedIndex="{Binding DataContext.SelectedListItemIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="RowEditEnding">
-                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="{Binding Path=Task, Source={StaticResource Resources}}" Binding="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="100" />
-                                    </DataGrid.Columns>
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{Binding Path=Authorization, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.OpenSubTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
-                                            <MenuItem Header="{Binding Path=Delete, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                </DataGrid>
-                                <Grid Grid.Row="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto" />
-                                        <ColumnDefinition Width="auto" />
-                                        <ColumnDefinition Width="auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Path=Task, Source={StaticResource Resources}}" Grid.Column="0" Width="100" />
-                                    <TextBox Grid.Column="1" Width="100" Text="{Binding DataContext.AddTaskName, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
-                                    <Button Content="{Binding Path=AddTask, Source={StaticResource Resources}}" Grid.Column="3" Width="100" HorizontalAlignment="Right" Command="{Binding DataContext.AddTaskEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="{Binding Path=Task, Source={StaticResource Resources}}" Binding="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="100" />
+                                        </DataGrid.Columns>
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{Binding Path=OpenSubTaskTab, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.OpenSubTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
+                                                <MenuItem Header="{Binding Path=Delete, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
+                                    </DataGrid>
                                 </Grid>
-                            </Grid>
-                        </ItemContainerTemplate>
-                    </TabControl.ContentTemplate>
-                </TabControl>
+                            </ItemContainerTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Path=Task, Source={StaticResource Resources}}" Grid.Column="0" Width="auto" HorizontalAlignment="Right" Margin="20 0 10 0" />
+                        <TextBox Grid.Column="1" Width="100" Text="{Binding DataContext.AddTaskName, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                        <Button Content="{Binding Path=AddTask, Source={StaticResource Resources}}" Grid.Column="3" Width="100" HorizontalAlignment="Right" Command="{Binding DataContext.AddTaskEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                    </Grid>
+                </Grid>
             </TabItem>
         </TabControl>
         <ComboBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Languages}" SelectedIndex="1" SelectedItem="{Binding SelectedLanguage}">
