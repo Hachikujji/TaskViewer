@@ -41,6 +41,9 @@ namespace TaskViewer.Tasks.ViewModels
         // selected task index in task list
         private int _selectedListItemIndex;
 
+        // selected task in task list
+        private TaskObject _selectedListItem;
+
         // selected tab index
         private int _selectedTabItemIndex;
 
@@ -175,6 +178,12 @@ namespace TaskViewer.Tasks.ViewModels
         {
             get => _selectedListItemIndex;
             set => SetProperty(ref _selectedListItemIndex, value);
+        }
+
+        public TaskObject SelectedListItem
+        {
+            get => _selectedListItem;
+            set => SetProperty(ref _selectedListItem, value);
         }
 
         public int SelectedTabItemIndex
@@ -343,10 +352,10 @@ namespace TaskViewer.Tasks.ViewModels
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
             {
-                var task = TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task;
+                var task = SelectedListItem.Task;
                 DeleteAllTaskRoot(ref _tasklist, task);
                 _databaseService.RemoveTaskAsync(task);
-                TabTaskList[SelectedTabItemIndex].SubTasks.RemoveAt(SelectedListItemIndex);
+                TabTaskList[SelectedTabItemIndex].SubTasks.Remove(SelectedListItem);
                 DeleteReferencedTabs(task);
             }
         }
@@ -378,7 +387,10 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void UpdateTaskAfterEditing()
         {
-            _databaseService.UpdateTaskAsync(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task);
+            if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
+            {
+                _databaseService.UpdateTaskAsync(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task);
+            }
         }
 
         /// <summary>
