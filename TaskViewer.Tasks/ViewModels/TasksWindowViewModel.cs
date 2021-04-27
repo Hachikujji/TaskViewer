@@ -115,18 +115,6 @@ namespace TaskViewer.Tasks.ViewModels
                     "English", new CultureInfo("en-US", false)
                 }
             };
-            Statuses = new Dictionary<string, int>
-            {
-                {
-                    languages.TaskUnassigned, 0
-                },
-                {
-                    languages.TaskInProgress, 1
-                },
-                {
-                    languages.TaskCompleted, 2
-                }
-            };
         }
 
         #endregion Public Constructors
@@ -248,7 +236,7 @@ namespace TaskViewer.Tasks.ViewModels
             if (_databaseService.IsUserPasswordCorrect(Username, password))
             {
                 id = _databaseService.GetUserId(Username);
-                CreateTaskTabsTemplate();
+                AfterAuthorizationInitialization();
                 _currentUserId = id;
                 HeaderSelectedTabIndex = 1;
                 _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
@@ -274,7 +262,7 @@ namespace TaskViewer.Tasks.ViewModels
                 return;
             if (_databaseService.IsUserExists(Username) == false)
             {
-                CreateTaskTabsTemplate();
+                AfterAuthorizationInitialization();
                 var user = new User(Username, password);
                 _databaseService.AddUserAsync(user);
                 HeaderSelectedTabIndex = 1;
@@ -352,14 +340,26 @@ namespace TaskViewer.Tasks.ViewModels
         }
 
         /// <summary>
-        /// Create clear list of tasks for new logged user
+        /// Create clear list of tasks and statuses for new logged user
         /// </summary>
-        private void CreateTaskTabsTemplate()
+        private void AfterAuthorizationInitialization()
         {
             TabControlTabs = new ObservableCollection<TaskObject>();
             TabControlTabs.Add(new TaskObject(new Task(_currentUserId, 0, languages.AllTasks, DateTime.Now), new ObservableCollection<TaskObject>()));
             TabControlTabs.Add(new TaskObject(new Task(_currentUserId, 0, languages.InProgress, DateTime.Now), new ObservableCollection<TaskObject>()));
             TabControlTabs.Add(new TaskObject(new Task(_currentUserId, 0, languages.Completed, DateTime.Now), new ObservableCollection<TaskObject>()));
+            Statuses = new Dictionary<string, int>
+            {
+                {
+                    languages.TaskUnassigned, 0
+                },
+                {
+                    languages.TaskInProgress, 1
+                },
+                {
+                    languages.TaskCompleted, 2
+                }
+            };
         }
 
         /// <summary>
