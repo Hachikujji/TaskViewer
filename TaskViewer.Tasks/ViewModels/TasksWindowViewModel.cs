@@ -47,29 +47,14 @@ namespace TaskViewer.Tasks.ViewModels
         // selected tab index
         private int _selectedTabItemIndex;
 
-        // selected tab index
-        private TaskObject _selectedComboBoxItem;
-
         // selected tab item
         private TaskObject _selectedTabItem;
 
         // list of all user tasks
         private List<Task> _tasklist = new List<Task>();
 
-        // All task list in TabControl
-        private ObservableCollection<TaskObject> _allTaskList;
-
-        // "In progress" task list in TabControl
-        private ObservableCollection<TaskObject> _inProgressTaskList;
-
-        // Completed task list in TabControl
-        private ObservableCollection<TaskObject> _completedTaskList;
-
-        // Completed task list in TabControl
+        // All tabs like: All tasks, in progress, completed
         private ObservableCollection<TaskObject> _tabControlTabs;
-
-        // List for extra tabs(subtasks) in TabControl
-        private ObservableCollection<TaskObject> _subTabTaskList;
 
         // Name textbox field
         private string _addTaskName;
@@ -91,9 +76,6 @@ namespace TaskViewer.Tasks.ViewModels
 
         // Selected language
         private KeyValuePair<string, CultureInfo> _selectedLanguage;
-
-        // Selected status
-        private KeyValuePair<string, int> _selectedStatus;
 
         // Amount of Main tabs ( Tasks, Completed, In progress, etc.)
         private int _mainTabsCount;
@@ -205,40 +187,10 @@ namespace TaskViewer.Tasks.ViewModels
             set => SetProperty(ref _selectedLanguage, value);
         }
 
-        public KeyValuePair<string, int> SelectedStatus
-        {
-            get => _selectedStatus;
-            set => SetProperty(ref _selectedStatus, value);
-        }
-
-        public ObservableCollection<TaskObject> AllTaskList
-        {
-            get => _allTaskList;
-            set => SetProperty(ref _allTaskList, value);
-        }
-
-        public ObservableCollection<TaskObject> CompletedTaskList
-        {
-            get => _completedTaskList;
-            set => SetProperty(ref _completedTaskList, value);
-        }
-
         public ObservableCollection<TaskObject> TabControlTabs
         {
-            get => _completedTaskList;
-            set => SetProperty(ref _completedTaskList, value);
-        }
-
-        public ObservableCollection<TaskObject> InProgressTaskList
-        {
-            get => _inProgressTaskList;
-            set => SetProperty(ref _inProgressTaskList, value);
-        }
-
-        public ObservableCollection<TaskObject> SubTabTaskList
-        {
-            get => _subTabTaskList;
-            set => SetProperty(ref _subTabTaskList, value);
+            get => _tabControlTabs;
+            set => SetProperty(ref _tabControlTabs, value);
         }
 
         public string AddTaskName
@@ -269,12 +221,6 @@ namespace TaskViewer.Tasks.ViewModels
         {
             get => _selectedTabItemIndex;
             set => SetProperty(ref _selectedTabItemIndex, value);
-        }
-
-        public TaskObject SelectedComboBoxItem
-        {
-            get => _selectedComboBoxItem;
-            set => SetProperty(ref _selectedComboBoxItem, value);
         }
 
         public TaskObject SelectedTabItem
@@ -498,6 +444,9 @@ namespace TaskViewer.Tasks.ViewModels
             }
         }
 
+        /// <summary>
+        /// Action when task status was edited
+        /// </summary>
         private void UpdateTaskStatus()
         {
             List<TaskObject> deleteList = new List<TaskObject>();
