@@ -50,6 +50,9 @@ namespace TaskViewer.Tasks.ViewModels
         // selected tab item
         private TaskObject _selectedTabItem;
 
+        // selected(on ComboBox first click) ComboBox index
+        private int _selectedComboBoxIndex;
+
         // list of all user tasks
         private List<Task> _tasklist = new List<Task>();
 
@@ -88,13 +91,15 @@ namespace TaskViewer.Tasks.ViewModels
         {
             _databaseService = databaseService;
             OpenSubTaskTabEvent = new DelegateCommand(OpenSubTaskTab);
-            UpdateTaskAfterEditingEvent = new DelegateCommand(UpdateTaskAfterEditing);
-            UpdateTaskStatusEvent = new DelegateCommand(UpdateTaskStatus);
+            UpdateTaskAfterEditingEvent = new DelegateCommand<object>(UpdateTaskAfterEditing);
+            UpdateTaskStatusEvent = new DelegateCommand<object>(UpdateTaskStatus);
             LanguageChangedEvent = new DelegateCommand(LanguageChanged);
+            SaveNotChangedTaskStatusEvent = new DelegateCommand<object>(SaveNotChangedTaskStatus);
             AddTaskEvent = new DelegateCommand(AddTask);
             DeleteTaskEvent = new DelegateCommand(DeleteTask);
             DeleteTaskTabEvent = new DelegateCommand(DeleteTaskTab);
             LogInButtonEvent = new DelegateCommand<object>(LogInButton);
+            LogOutEvent = new DelegateCommand(LogOutButton);
             RegistrationButtonEvent = new DelegateCommand<object>(RegistrationButton);
             _timerDuration = 3000;
             SelectedTabItemIndex = -1;
@@ -119,106 +124,6 @@ namespace TaskViewer.Tasks.ViewModels
 
         #endregion Public Constructors
 
-        #region Public Properties
-
-        #region Authorization
-
-        public Visibility AuthorizationErrorLogVisibility
-        {
-            get => _authorizationErrorLogVisibility;
-            set => SetProperty(ref _authorizationErrorLogVisibility, value);
-        }
-
-        public string AuthorizationErrorLog
-        {
-            get => _authorizationErrorLog;
-            set => SetProperty(ref _authorizationErrorLog, value);
-        }
-
-        public DelegateCommand<object> LogInButtonEvent { get; }
-        public DelegateCommand<object> RegistrationButtonEvent { get; }
-
-        public string Username
-        {
-            get => _username;
-            set => SetProperty(ref _username, value);
-        }
-
-        #endregion Authorization
-
-        public DelegateCommand UpdateTaskAfterEditingEvent { get; }
-        public DelegateCommand UpdateTaskStatusEvent { get; }
-        public DelegateCommand LanguageChangedEvent { get; }
-        public DelegateCommand TestButtonEvent { get; }
-        public DelegateCommand AddTaskEvent { get; }
-
-        public DelegateCommand DeleteTaskEvent { get; }
-
-        public DelegateCommand DeleteTaskTabEvent { get; }
-        public DelegateCommand OpenSubTaskTabEvent { get; }
-
-        public Dictionary<string, CultureInfo> Languages
-        {
-            get => _languages;
-            set => SetProperty(ref _languages, value);
-        }
-
-        public Dictionary<string, int> Statuses
-        {
-            get => _statuses;
-            set => SetProperty(ref _statuses, value);
-        }
-
-        public KeyValuePair<string, CultureInfo> SelectedLanguage
-        {
-            get => _selectedLanguage;
-            set => SetProperty(ref _selectedLanguage, value);
-        }
-
-        public ObservableCollection<TaskObject> TabControlTabs
-        {
-            get => _tabControlTabs;
-            set => SetProperty(ref _tabControlTabs, value);
-        }
-
-        public string AddTaskName
-        {
-            get => _addTaskName;
-            set => SetProperty(ref _addTaskName, value);
-        }
-
-        public int HeaderSelectedTabIndex
-        {
-            get => _headerSelectedTabIndex;
-            set => SetProperty(ref _headerSelectedTabIndex, value);
-        }
-
-        public int SelectedListItemIndex
-        {
-            get => _selectedListItemIndex;
-            set => SetProperty(ref _selectedListItemIndex, value);
-        }
-
-        public TaskObject SelectedListItem
-        {
-            get => _selectedListItem;
-            set => SetProperty(ref _selectedListItem, value);
-        }
-
-        public int SelectedTabItemIndex
-        {
-            get => _selectedTabItemIndex;
-            set => SetProperty(ref _selectedTabItemIndex, value);
-        }
-
-        public TaskObject SelectedTabItem
-        {
-            get => _selectedTabItem;
-            set => SetProperty(ref _selectedTabItem, value);
-        }
-
-        #endregion Public Properties
-
         #region Private Methods
 
         #region Authorization
@@ -230,6 +135,7 @@ namespace TaskViewer.Tasks.ViewModels
         private void LogInButton(object PasswordBox)
         {
             string password = (PasswordBox as PasswordBox)?.Password;
+            (PasswordBox as PasswordBox).Password = string.Empty;
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
                 return;
             int id;
@@ -249,6 +155,14 @@ namespace TaskViewer.Tasks.ViewModels
                 AuthorizationErrorLogVisibility = Visibility.Visible;
                 _authorizationErrorLogTimer.Start();
             }
+        }
+
+        /// <summary>
+        /// Action when logout button pressed
+        /// </summary>
+        private void LogOutButton()
+        {
+            HeaderSelectedTabIndex = 0;
         }
 
         /// <summary>
@@ -295,7 +209,7 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void AddTask()
         {
-            if (SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1)
+            if ((SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1) && !string.IsNullOrWhiteSpace(AddTaskName))
             {
                 int mainTaskId;
 
@@ -436,36 +350,33 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when task was edited
         /// </summary>
-        private void UpdateTaskAfterEditing()
+        private void UpdateTaskAfterEditing(Object GridCell)
         {
-            if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
-            {
-                _databaseService.UpdateTaskAsync(SelectedListItem.Task);
-            }
+            TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
+            _databaseService.UpdateTaskAsync(t.Task);
         }
 
         /// <summary>
         /// Action when task status was edited
         /// </summary>
-        private void UpdateTaskStatus()
+        private void UpdateTaskStatus(Object GridCell)
         {
+            TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
+            UpdateTaskAfterEditing(GridCell);
             List<TaskObject> deleteList = new List<TaskObject>();
-            // clear Completed tab
-            foreach (var item in TabControlTabs[(int)TabsEnum.CompletedTasks].SubTasks)
-                if (item.Task.Status != (int)StatusEnum.Completed)
-                    deleteList.Add(item);
-            foreach (var item in deleteList)
-                TabControlTabs[(int)TabsEnum.CompletedTasks].SubTasks.Remove(item);
-            // clear In progress tab
-            deleteList = new List<TaskObject>();
-            foreach (var item in TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks)
-                if (item.Task.Status != (int)StatusEnum.InProgress)
-                    deleteList.Add(item);
-            foreach (var item in deleteList)
-                TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks.Remove(item);
-            if (SelectedListItem.Task.Status != (int)StatusEnum.Unassigned)
-                TabControlTabs[SelectedListItem.Task.Status].SubTasks.Add(SelectedListItem);
-            UpdateTaskAfterEditing();
+            if (SelectedComboBoxIndex != (int)TabsEnum.AllTasks)
+                TabControlTabs[SelectedComboBoxIndex].SubTasks.Remove(t);
+            if (t.Task.Status != (int)StatusEnum.Unassigned)
+                TabControlTabs[t.Task.Status].SubTasks.Add(t);
+        }
+
+        /// <summary>
+        /// Save not changed task(with old status)
+        /// </summary>
+        private void SaveNotChangedTaskStatus(object GridCell)
+        {
+            TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
+            SelectedComboBoxIndex = t.Task.Status;
         }
 
         /// <summary>
@@ -481,5 +392,112 @@ namespace TaskViewer.Tasks.ViewModels
         }
 
         #endregion Private Methods
+
+        #region Public Properties
+
+        #region Authorization
+
+        public Visibility AuthorizationErrorLogVisibility
+        {
+            get => _authorizationErrorLogVisibility;
+            set => SetProperty(ref _authorizationErrorLogVisibility, value);
+        }
+
+        public string AuthorizationErrorLog
+        {
+            get => _authorizationErrorLog;
+            set => SetProperty(ref _authorizationErrorLog, value);
+        }
+
+        public DelegateCommand<object> LogInButtonEvent { get; }
+        public DelegateCommand<object> RegistrationButtonEvent { get; }
+
+        public string Username
+        {
+            get => _username;
+            set => SetProperty(ref _username, value);
+        }
+
+        #endregion Authorization
+
+        public DelegateCommand<object> UpdateTaskAfterEditingEvent { get; }
+        public DelegateCommand<object> UpdateTaskStatusEvent { get; }
+        public DelegateCommand LanguageChangedEvent { get; }
+        public DelegateCommand LogOutEvent { get; }
+        public DelegateCommand TestButtonEvent { get; }
+        public DelegateCommand AddTaskEvent { get; }
+        public DelegateCommand<object> SaveNotChangedTaskStatusEvent { get; }
+        public DelegateCommand DeleteTaskEvent { get; }
+
+        public DelegateCommand DeleteTaskTabEvent { get; }
+        public DelegateCommand OpenSubTaskTabEvent { get; }
+
+        public Dictionary<string, CultureInfo> Languages
+        {
+            get => _languages;
+            set => SetProperty(ref _languages, value);
+        }
+
+        public Dictionary<string, int> Statuses
+        {
+            get => _statuses;
+            set => SetProperty(ref _statuses, value);
+        }
+
+        public KeyValuePair<string, CultureInfo> SelectedLanguage
+        {
+            get => _selectedLanguage;
+            set => SetProperty(ref _selectedLanguage, value);
+        }
+
+        public ObservableCollection<TaskObject> TabControlTabs
+        {
+            get => _tabControlTabs;
+            set => SetProperty(ref _tabControlTabs, value);
+        }
+
+        public string AddTaskName
+        {
+            get => _addTaskName;
+            set => SetProperty(ref _addTaskName, value);
+        }
+
+        public int HeaderSelectedTabIndex
+        {
+            get => _headerSelectedTabIndex;
+            set => SetProperty(ref _headerSelectedTabIndex, value);
+        }
+
+        public int SelectedListItemIndex
+        {
+            get => _selectedListItemIndex;
+            set => SetProperty(ref _selectedListItemIndex, value);
+        }
+
+        public TaskObject SelectedListItem
+        {
+            get => _selectedListItem;
+            set => SetProperty(ref _selectedListItem, value);
+        }
+
+        public int SelectedTabItemIndex
+        {
+            get => _selectedTabItemIndex;
+            set => SetProperty(ref _selectedTabItemIndex, value);
+        }
+
+        public TaskObject SelectedTabItem
+        {
+            get => _selectedTabItem;
+            set => SetProperty(ref _selectedTabItem, value);
+        }
+
+        public int SelectedComboBoxIndex
+        {
+            get => _selectedComboBoxIndex;
+            set => SetProperty(ref _selectedComboBoxIndex, value);
+        }
+
+        #endregion Public Properties
     }
 }

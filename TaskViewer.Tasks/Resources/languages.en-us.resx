@@ -145,7 +145,7 @@
     <value>Login</value>
   </data>
   <data name="LoginError" xml:space="preserve">
-    <value>This username already exists.</value>
+    <value>Wrong username or password.</value>
   </data>
   <data name="OpenSubTaskTab" xml:space="preserve">
     <value>OpenSubTaskTab</value>
@@ -157,7 +157,7 @@
     <value>Registration</value>
   </data>
   <data name="RegistrationError" xml:space="preserve">
-    <value>Wrong username or password.</value>
+    <value>This username already exists.</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Status</value>

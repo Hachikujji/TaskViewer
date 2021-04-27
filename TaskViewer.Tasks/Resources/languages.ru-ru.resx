@@ -145,7 +145,7 @@
     <value>Войти</value>
   </data>
   <data name="LoginError" xml:space="preserve">
-    <value>Это имя пользователя уже занято</value>
+    <value>Неверные имя пользователя или пароль</value>
   </data>
   <data name="OpenSubTaskTab" xml:space="preserve">
     <value>Открыть вкладку подзадач</value>
@@ -157,7 +157,7 @@
     <value>Зарегистрироваться</value>
   </data>
   <data name="RegistrationError" xml:space="preserve">
-    <value>Неверные имя пользователя или пароль</value>
+    <value>Это имя пользователя уже занято</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Статус</value>

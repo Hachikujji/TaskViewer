@@ -142,7 +142,7 @@ namespace TaskViewer.Tasks.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This username already exists..
+        ///   Looks up a localized string similar to Wrong username or password..
         /// </summary>
         public static string LoginError {
             get {
@@ -178,7 +178,7 @@ namespace TaskViewer.Tasks.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wrong username or password..
+        ///   Looks up a localized string similar to This username already exists..
         /// </summary>
         public static string RegistrationError {
             get {
