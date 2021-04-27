@@ -47,11 +47,29 @@ namespace TaskViewer.Tasks.ViewModels
         // selected tab index
         private int _selectedTabItemIndex;
 
+        // selected tab index
+        private TaskObject _selectedComboBoxItem;
+
+        // selected tab item
+        private TaskObject _selectedTabItem;
+
         // list of all user tasks
         private List<Task> _tasklist = new List<Task>();
 
-        // task tree
-        private ObservableCollection<TaskObject> _tabTaskList;
+        // All task list in TabControl
+        private ObservableCollection<TaskObject> _allTaskList;
+
+        // "In progress" task list in TabControl
+        private ObservableCollection<TaskObject> _inProgressTaskList;
+
+        // Completed task list in TabControl
+        private ObservableCollection<TaskObject> _completedTaskList;
+
+        // Completed task list in TabControl
+        private ObservableCollection<TaskObject> _tabControlTabs;
+
+        // List for extra tabs(subtasks) in TabControl
+        private ObservableCollection<TaskObject> _subTabTaskList;
 
         // Name textbox field
         private string _addTaskName;
@@ -68,8 +86,17 @@ namespace TaskViewer.Tasks.ViewModels
         // Languages dictionary
         private Dictionary<string, CultureInfo> _languages;
 
+        // Status dictionary
+        private Dictionary<string, int> _statuses;
+
         // Selected language
         private KeyValuePair<string, CultureInfo> _selectedLanguage;
+
+        // Selected status
+        private KeyValuePair<string, int> _selectedStatus;
+
+        // Amount of Main tabs ( Tasks, Completed, In progress, etc.)
+        private int _mainTabsCount;
 
         #endregion Private Fields
 
@@ -80,6 +107,7 @@ namespace TaskViewer.Tasks.ViewModels
             _databaseService = databaseService;
             OpenSubTaskTabEvent = new DelegateCommand(OpenSubTaskTab);
             UpdateTaskAfterEditingEvent = new DelegateCommand(UpdateTaskAfterEditing);
+            UpdateTaskStatusEvent = new DelegateCommand(UpdateTaskStatus);
             LanguageChangedEvent = new DelegateCommand(LanguageChanged);
             AddTaskEvent = new DelegateCommand(AddTask);
             DeleteTaskEvent = new DelegateCommand(DeleteTask);
@@ -94,13 +122,27 @@ namespace TaskViewer.Tasks.ViewModels
             _authorizationErrorLogTimer.Elapsed += TimerElapsedEvent;
             AuthorizationErrorLogVisibility = Visibility.Hidden;
 
-            _languages = new Dictionary<string, CultureInfo>
+            _mainTabsCount = Enum.GetNames(typeof(TabsEnum)).Length;
+
+            Languages = new Dictionary<string, CultureInfo>
             {
                 {
                     "Русский", new CultureInfo("ru-RU", false)
                 },
                 {
                     "English", new CultureInfo("en-US", false)
+                }
+            };
+            Statuses = new Dictionary<string, int>
+            {
+                {
+                    languages.TaskUnassigned, 0
+                },
+                {
+                    languages.TaskInProgress, 1
+                },
+                {
+                    languages.TaskCompleted, 2
                 }
             };
         }
@@ -135,6 +177,7 @@ namespace TaskViewer.Tasks.ViewModels
         #endregion Authorization
 
         public DelegateCommand UpdateTaskAfterEditingEvent { get; }
+        public DelegateCommand UpdateTaskStatusEvent { get; }
         public DelegateCommand LanguageChangedEvent { get; }
         public DelegateCommand TestButtonEvent { get; }
         public DelegateCommand AddTaskEvent { get; }
@@ -150,16 +193,52 @@ namespace TaskViewer.Tasks.ViewModels
             set => SetProperty(ref _languages, value);
         }
 
+        public Dictionary<string, int> Statuses
+        {
+            get => _statuses;
+            set => SetProperty(ref _statuses, value);
+        }
+
         public KeyValuePair<string, CultureInfo> SelectedLanguage
         {
             get => _selectedLanguage;
             set => SetProperty(ref _selectedLanguage, value);
         }
 
-        public ObservableCollection<TaskObject> TabTaskList
+        public KeyValuePair<string, int> SelectedStatus
         {
-            get => _tabTaskList;
-            set => SetProperty(ref _tabTaskList, value);
+            get => _selectedStatus;
+            set => SetProperty(ref _selectedStatus, value);
+        }
+
+        public ObservableCollection<TaskObject> AllTaskList
+        {
+            get => _allTaskList;
+            set => SetProperty(ref _allTaskList, value);
+        }
+
+        public ObservableCollection<TaskObject> CompletedTaskList
+        {
+            get => _completedTaskList;
+            set => SetProperty(ref _completedTaskList, value);
+        }
+
+        public ObservableCollection<TaskObject> TabControlTabs
+        {
+            get => _completedTaskList;
+            set => SetProperty(ref _completedTaskList, value);
+        }
+
+        public ObservableCollection<TaskObject> InProgressTaskList
+        {
+            get => _inProgressTaskList;
+            set => SetProperty(ref _inProgressTaskList, value);
+        }
+
+        public ObservableCollection<TaskObject> SubTabTaskList
+        {
+            get => _subTabTaskList;
+            set => SetProperty(ref _subTabTaskList, value);
         }
 
         public string AddTaskName
@@ -192,6 +271,18 @@ namespace TaskViewer.Tasks.ViewModels
             set => SetProperty(ref _selectedTabItemIndex, value);
         }
 
+        public TaskObject SelectedComboBoxItem
+        {
+            get => _selectedComboBoxItem;
+            set => SetProperty(ref _selectedComboBoxItem, value);
+        }
+
+        public TaskObject SelectedTabItem
+        {
+            get => _selectedTabItem;
+            set => SetProperty(ref _selectedTabItem, value);
+        }
+
         #endregion Public Properties
 
         #region Private Methods
@@ -204,19 +295,19 @@ namespace TaskViewer.Tasks.ViewModels
         /// <param name="PasswordBox"></param>
         private void LogInButton(object PasswordBox)
         {
-            string password = (PasswordBox as PasswordBox).Password;
+            string password = (PasswordBox as PasswordBox)?.Password;
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
                 return;
             int id;
-            if (_databaseService.IsUserPasswordCorrect(Username, password) != false)
+            if (_databaseService.IsUserPasswordCorrect(Username, password))
             {
                 id = _databaseService.GetUserId(Username);
-                CreateTasksTabTemplate();
+                CreateTaskTabsTemplate();
                 _currentUserId = id;
                 HeaderSelectedTabIndex = 1;
                 _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
-                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
-                CloseAllSubTabs();
+                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabControlTabs[(int)TabsEnum.AllTasks].SubTasks);
+                SelectedTabItemIndex = 0;
             }
             else
             {
@@ -237,14 +328,12 @@ namespace TaskViewer.Tasks.ViewModels
                 return;
             if (_databaseService.IsUserExists(Username) == false)
             {
-                CreateTasksTabTemplate();
+                CreateTaskTabsTemplate();
                 var user = new User(Username, password);
                 _databaseService.AddUserAsync(user);
                 HeaderSelectedTabIndex = 1;
                 _currentUserId = user.Id;
-                _tasklist = _databaseService.GetTaskListAsync(_currentUserId).Result;
-                ConvertTaskListToTaskObjectObservableCol(ref _tasklist, TabTaskList);
-                CloseAllSubTabs();
+                SelectedTabItemIndex = 0;
             }
             else
             {
@@ -272,17 +361,22 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void AddTask()
         {
-            if (SelectedTabItemIndex >= 0)
+            if (SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1)
             {
-                var task = new Task(_currentUserId, AddTaskName, TabTaskList[SelectedTabItemIndex].Task.Id);
+                int mainTaskId;
+
+                mainTaskId = SelectedTabItem.Task.Id;
+                var task = new Task(_currentUserId, mainTaskId, AddTaskName, DateTime.Now);
                 _databaseService.AddTaskAsync(task);
                 _tasklist.Add(task);
-                TabTaskList[SelectedTabItemIndex].SubTasks.Add(new TaskObject(task, new ObservableCollection<TaskObject>()));
+                var taskObject = new TaskObject(task, new ObservableCollection<TaskObject>());
+                if (SelectedTabItem != null)
+                    SelectedTabItem.SubTasks.Add(taskObject);
             }
         }
 
         /// <summary>
-        /// Create task tree from task list
+        /// Create task tree and fill "completed" & "In progress" tabs from task list
         /// </summary>
         /// <param name="taskList"></param>
         /// <param name="taskObjects"></param>
@@ -292,7 +386,18 @@ namespace TaskViewer.Tasks.ViewModels
             foreach (var item in taskList)
             {
                 if (item.MainTaskId == mainTaskId)
-                    taskObjects.Add(new TaskObject(item, new ObservableCollection<TaskObject>()));
+                {
+                    var taskObject = new TaskObject(item, new ObservableCollection<TaskObject>());
+                    taskObjects.Add(taskObject);
+                    if (item.Status == (int)StatusEnum.Completed)
+                    {
+                        TabControlTabs[(int)TabsEnum.CompletedTasks].SubTasks.Add(taskObject);
+                    }
+                    if (item.Status == (int)StatusEnum.InProgress)
+                    {
+                        TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks.Add(taskObject);
+                    }
+                }
             }
             foreach (var item in taskObjects)
             {
@@ -303,10 +408,12 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Create clear list of tasks for new logged user
         /// </summary>
-        private void CreateTasksTabTemplate()
+        private void CreateTaskTabsTemplate()
         {
-            TabTaskList = new ObservableCollection<TaskObject>();
-            TabTaskList.Add(new TaskObject(new Task(_currentUserId, "🏠", 0), new ObservableCollection<TaskObject>()));
+            TabControlTabs = new ObservableCollection<TaskObject>();
+            TabControlTabs.Add(new TaskObject(new Task(_currentUserId, 0, languages.AllTasks, DateTime.Now), new ObservableCollection<TaskObject>()));
+            TabControlTabs.Add(new TaskObject(new Task(_currentUserId, 0, languages.InProgress, DateTime.Now), new ObservableCollection<TaskObject>()));
+            TabControlTabs.Add(new TaskObject(new Task(_currentUserId, 0, languages.Completed, DateTime.Now), new ObservableCollection<TaskObject>()));
         }
 
         /// <summary>
@@ -334,7 +441,7 @@ namespace TaskViewer.Tasks.ViewModels
         private void DeleteReferencedTabs(Task task)
         {
             List<TaskObject> deleteTabList = new List<TaskObject>();
-            foreach (var tab in TabTaskList)
+            foreach (var tab in TabControlTabs)
             {
                 if (task.Id == tab.Task.Id)
                 {
@@ -342,7 +449,7 @@ namespace TaskViewer.Tasks.ViewModels
                 }
             }
             foreach (var delTask in deleteTabList)
-                TabTaskList.Remove(delTask);
+                TabControlTabs.Remove(delTask);
         }
 
         /// <summary>
@@ -350,12 +457,12 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void DeleteTask()
         {
-            if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
+            if ((SelectedListItemIndex >= 0) && (SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1))
             {
                 var task = SelectedListItem.Task;
                 DeleteAllTaskRoot(ref _tasklist, task);
                 _databaseService.RemoveTaskAsync(task);
-                TabTaskList[SelectedTabItemIndex].SubTasks.Remove(SelectedListItem);
+                SelectedTabItem.SubTasks.Remove(SelectedListItem);
                 DeleteReferencedTabs(task);
             }
         }
@@ -365,10 +472,8 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void DeleteTaskTab()
         {
-            if (SelectedTabItemIndex >= 1)
-            {
-                TabTaskList.RemoveAt(SelectedTabItemIndex);
-            }
+            if (SelectedTabItemIndex > _mainTabsCount - 1)
+                TabControlTabs.Remove(SelectedTabItem);
         }
 
         /// <summary>
@@ -378,7 +483,7 @@ namespace TaskViewer.Tasks.ViewModels
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
             {
-                TabTaskList.Add(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex]);
+                TabControlTabs.Add(SelectedListItem);
             }
         }
 
@@ -389,8 +494,29 @@ namespace TaskViewer.Tasks.ViewModels
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
             {
-                _databaseService.UpdateTaskAsync(TabTaskList[SelectedTabItemIndex].SubTasks[SelectedListItemIndex].Task);
+                _databaseService.UpdateTaskAsync(SelectedListItem.Task);
             }
+        }
+
+        private void UpdateTaskStatus()
+        {
+            List<TaskObject> deleteList = new List<TaskObject>();
+            // clear Completed tab
+            foreach (var item in TabControlTabs[(int)TabsEnum.CompletedTasks].SubTasks)
+                if (item.Task.Status != (int)StatusEnum.Completed)
+                    deleteList.Add(item);
+            foreach (var item in deleteList)
+                TabControlTabs[(int)TabsEnum.CompletedTasks].SubTasks.Remove(item);
+            // clear In progress tab
+            deleteList = new List<TaskObject>();
+            foreach (var item in TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks)
+                if (item.Task.Status != (int)StatusEnum.InProgress)
+                    deleteList.Add(item);
+            foreach (var item in deleteList)
+                TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks.Remove(item);
+            if (SelectedListItem.Task.Status != (int)StatusEnum.Unassigned)
+                TabControlTabs[SelectedListItem.Task.Status].SubTasks.Add(SelectedListItem);
+            UpdateTaskAfterEditing();
         }
 
         /// <summary>
@@ -403,17 +529,6 @@ namespace TaskViewer.Tasks.ViewModels
 
             CultureInfo cultureInfo = new CultureInfo(SelectedLanguage.Value.Name);
             CultureResources.ChangeCulture(cultureInfo);
-        }
-
-        /// <summary>
-        /// Remove all tabs when task tree was created.
-        /// </summary>
-        private void CloseAllSubTabs()
-        {
-            for (int i = TabTaskList.Count - 1; i > 0; i--)
-            {
-                TabTaskList.RemoveAt(i);
-            }
         }
 
         #endregion Private Methods

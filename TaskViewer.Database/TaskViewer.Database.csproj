@@ -74,9 +74,7 @@
     <Compile Include="Models\sp_helpdiagrams_Result.cs">
       <DependentUpon>DatabaseEntityModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\sysdiagram.cs">
-      <DependentUpon>DatabaseEntityModel.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Models\StatusEnum.cs" />
     <Compile Include="Models\Task.cs">
       <DependentUpon>DatabaseEntityModel.tt</DependentUpon>
     </Compile>

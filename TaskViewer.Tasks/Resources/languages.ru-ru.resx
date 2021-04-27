@@ -120,11 +120,26 @@
   <data name="AddTask" xml:space="preserve">
     <value>Добавить задачу</value>
   </data>
+  <data name="AllTasks" xml:space="preserve">
+    <value>Все задачи</value>
+  </data>
   <data name="Authorization" xml:space="preserve">
     <value>Авторизация</value>
   </data>
+  <data name="Completed" xml:space="preserve">
+    <value>Выполнены</value>
+  </data>
+  <data name="CreationDate" xml:space="preserve">
+    <value>Дата создания</value>
+  </data>
   <data name="Delete" xml:space="preserve">
     <value>Удалить</value>
+  </data>
+  <data name="ExpirationDate" xml:space="preserve">
+    <value>Выполнить до</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>Выполняются</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Войти</value>
@@ -144,11 +159,23 @@
   <data name="RegistrationError" xml:space="preserve">
     <value>Неверные имя пользователя или пароль</value>
   </data>
+  <data name="Status" xml:space="preserve">
+    <value>Статус</value>
+  </data>
   <data name="Task" xml:space="preserve">
     <value>Задача</value>
   </data>
+  <data name="TaskCompleted" xml:space="preserve">
+    <value>Выполнен</value>
+  </data>
+  <data name="TaskInProgress" xml:space="preserve">
+    <value>Выполняется</value>
+  </data>
   <data name="Tasks" xml:space="preserve">
     <value>Задачи</value>
+  </data>
+  <data name="TaskUnassigned" xml:space="preserve">
+    <value>Не выполняется</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Имя пользователя</value>

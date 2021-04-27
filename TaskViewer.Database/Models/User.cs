@@ -19,11 +19,6 @@ namespace TaskViewer.Database.Models
         {
             this.Tasks = new HashSet<Task>();
         }
-        public User(string u, string p)
-        {
-            Username = u;
-            Password = p;
-        }
     
         public int Id { get; set; }
         public string Username { get; set; }
@@ -31,5 +26,11 @@ namespace TaskViewer.Database.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Task> Tasks { get; set; }
+
+        public User(string u, string p)
+        {
+            Username = u;
+            Password = p;
+        }
     }
 }

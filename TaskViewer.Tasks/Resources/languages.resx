@@ -120,11 +120,26 @@
   <data name="AddTask" xml:space="preserve">
     <value>Add </value>
   </data>
+  <data name="AllTasks" xml:space="preserve">
+    <value>All tasks</value>
+  </data>
   <data name="Authorization" xml:space="preserve">
     <value>Authorization</value>
   </data>
+  <data name="Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="CreationDate" xml:space="preserve">
+    <value>Creation Time</value>
+  </data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
+  </data>
+  <data name="ExpirationDate" xml:space="preserve">
+    <value>Expiration Date</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>In progress</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Login</value>
@@ -144,11 +159,23 @@
   <data name="RegistrationError" xml:space="preserve">
     <value>Wrong username or password.</value>
   </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="Task" xml:space="preserve">
     <value>Task</value>
   </data>
+  <data name="TaskCompleted" xml:space="preserve">
+    <value>Xompleted</value>
+  </data>
+  <data name="TaskInProgress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
   <data name="Tasks" xml:space="preserve">
     <value>Tasks</value>
+  </data>
+  <data name="TaskUnassigned" xml:space="preserve">
+    <value>Unassigned</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Username</value>

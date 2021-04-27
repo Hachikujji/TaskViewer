@@ -15,20 +15,28 @@ namespace TaskViewer.Database.Models
     public partial class Task
     {
         public int Id { get; set; }
-        public int UsersId { get; set; }
-        public string Name { get; set; }
+        public int UserId { get; set; }
         public int MainTaskId { get; set; }
+        public string Name { get; set; }
+        public System.DateTime CreationDate { get; set; }
+        public Nullable<System.DateTime> ExpirationDate { get; set; }
+        public int Status { get; set; }
+    
+        public virtual User User { get; set; }
+
+        public Task(int userId, int mainTaskId, string name, DateTime creationDate, Nullable<DateTime> expirationDate = null)
+        {
+            UserId = userId;
+            MainTaskId = mainTaskId;
+            Name = name;
+            CreationDate = creationDate;
+            ExpirationDate = expirationDate;
+            Status = (int)StatusEnum.Unassigned;
+        }
 
         public Task()
         {
 
         }
-        public Task(int usersId,string name,int mainTaskId)
-        {
-            UsersId = usersId;
-            Name = name;
-            MainTaskId = mainTaskId;
-        }
-        public virtual User User { get; set; }
     }
 }

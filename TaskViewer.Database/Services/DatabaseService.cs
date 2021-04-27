@@ -88,7 +88,7 @@ namespace TaskViewer.Database.Services
             var list = new List<Models.Task>();
             using (TaskViewerEntities entities = new TaskViewerEntities())
             {
-                list = await entities.Tasks.Where(t => t.UsersId == id).ToListAsync().ConfigureAwait(false);
+                list = await entities.Tasks.Where(t => t.UserId == id).ToListAsync().ConfigureAwait(false);
                 return list;
             }
         }
