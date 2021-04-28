@@ -309,7 +309,7 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void DeleteTask()
         {
-            if ((SelectedListItemIndex >= 0) && (SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1))
+            if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
             {
                 var task = SelectedListItem.Task;
                 DeleteAllTaskRoot(ref _tasklist, task);
