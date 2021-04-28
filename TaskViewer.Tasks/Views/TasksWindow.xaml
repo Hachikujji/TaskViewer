@@ -64,7 +64,7 @@
                         </Grid>
                     </StackPanel>
                     <!-- language change comboBox -->
-                    <ComboBox Style="{DynamicResource MaterialDesignComboBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Languages}" SelectedIndex="1" SelectedItem="{Binding SelectedLanguage}" Margin="0,-26,0,0" Height="26">
+                    <ComboBox Style="{DynamicResource MaterialDesignComboBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Languages}" SelectedIndex="1" SelectedItem="{Binding SelectedLanguage}" Height="26">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
                                 <i:InvokeCommandAction Command="{Binding LanguageChangedEvent}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />

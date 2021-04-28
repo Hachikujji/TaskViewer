@@ -131,7 +131,6 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when login button pressed
         /// </summary>
-        /// <param name="PasswordBox"></param>
         private void LogInButton(object PasswordBox)
         {
             string password = (PasswordBox as PasswordBox)?.Password;
@@ -168,7 +167,6 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when registration button pressed
         /// </summary>
-        /// <param name="PasswordBox"></param>
         private void RegistrationButton(object PasswordBox)
         {
             string password = (PasswordBox as PasswordBox).Password;
@@ -181,7 +179,7 @@ namespace TaskViewer.Tasks.ViewModels
                 var user = new User(Username, password);
                 _databaseService.AddUserAsync(user);
                 HeaderSelectedTabIndex = 1;
-                _currentUserId = user.Id;
+                _currentUserId = _databaseService.GetUserId(Username);
                 SelectedTabItemIndex = 0;
             }
             else
@@ -195,8 +193,6 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when timer elapsed
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void TimerElapsedEvent(object sender, ElapsedEventArgs e)
         {
             AuthorizationErrorLogVisibility = Visibility.Hidden;
@@ -227,9 +223,6 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Create task tree and fill "completed" & "In progress" tabs from task list
         /// </summary>
-        /// <param name="taskList"></param>
-        /// <param name="taskObjects"></param>
-        /// <param name="mainTaskId"></param>
         private void ConvertTaskListToTaskObjectObservableCol(ref List<Task> taskList, ObservableCollection<TaskObject> taskObjects, int mainTaskId = 0)
         {
             foreach (var item in taskList)
@@ -280,8 +273,6 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Delete all task root
         /// </summary>
-        /// <param name="taskList"> Task list</param>
-        /// <param name="task"> task </param>
         private void DeleteAllTaskRoot(ref List<Task> taskList, Task task)
         {
             foreach (var item in taskList)
