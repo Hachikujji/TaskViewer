@@ -238,14 +238,15 @@
                                     <Grid Height="33">
                                         <TextBlock Text="{Binding DataContext.Username, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"></TextBlock>
                                     </Grid>
-                                    <materialDesign:PackIcon Kind="Logout" Height="30" Width="30">
+                                    <Grid Background="Transparent">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="MouseLeftButtonDown">
                                                 <i:InvokeCommandAction Command="{Binding LogOutEvent}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
-                                        <materialDesign:PackIcon.ToolTip>Logout</materialDesign:PackIcon.ToolTip>
-                                    </materialDesign:PackIcon>
+                                        <Grid.ToolTip>Logout</Grid.ToolTip>
+                                        <materialDesign:PackIcon Kind="Logout" Height="30" Width="30" />
+                                    </Grid>
                                 </StackPanel>
                             </DockPanel>
                         </materialDesign:ColorZone>
