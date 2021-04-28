@@ -172,6 +172,7 @@ namespace TaskViewer.Tasks.ViewModels
         private void RegistrationButton(object PasswordBox)
         {
             string password = (PasswordBox as PasswordBox).Password;
+            (PasswordBox as PasswordBox).Password = string.Empty;
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
                 return;
             if (_databaseService.IsUserExists(Username) == false)
@@ -352,8 +353,14 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void UpdateTaskAfterEditing(Object GridCell)
         {
-            TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
-            _databaseService.UpdateTaskAsync(t.Task);
+            //if ComboBox
+            if (GridCell != null)
+            {
+                TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
+                _databaseService.UpdateTaskAsync(t.Task);
+            }
+            else
+                _databaseService.UpdateTaskAsync(SelectedListItem.Task);
         }
 
         /// <summary>
