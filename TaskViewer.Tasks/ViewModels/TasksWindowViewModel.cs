@@ -280,6 +280,8 @@ namespace TaskViewer.Tasks.ViewModels
                 if (item.MainTaskId == task.Id)
                 {
                     DeleteAllTaskRoot(ref taskList, item);
+                    if (item.Status != (int)TabsEnum.AllTasks)
+                        DeleteTaskFromFolders(item);
                     _databaseService.RemoveTaskAsync(item);
                     DeleteReferencedTabs(item);
                 }
@@ -305,11 +307,25 @@ namespace TaskViewer.Tasks.ViewModels
         }
 
         /// <summary>
+        /// Delete all Task ref from folders
+        /// </summary>
+        /// <param name="task"></param>
+        private void DeleteTaskFromFolders(Task task)
+        {
+            List<TaskObject> deleteTabList = new List<TaskObject>();
+            foreach (var item in TabControlTabs[task.Status].SubTasks)
+                if (task.Id == item.Task.Id)
+                    deleteTabList.Add(item);
+            foreach (var delTask in deleteTabList)
+                TabControlTabs[task.Status].SubTasks.Remove(delTask);
+        }
+
+        /// <summary>
         /// Delete task context menu
         /// </summary>
         private void DeleteTask()
         {
-            if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
+            if ((SelectedListItemIndex >= 0) && (SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1))
             {
                 var task = SelectedListItem.Task;
                 DeleteAllTaskRoot(ref _tasklist, task);
