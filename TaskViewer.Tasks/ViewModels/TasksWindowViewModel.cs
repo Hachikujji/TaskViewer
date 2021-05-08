@@ -275,13 +275,15 @@ namespace TaskViewer.Tasks.ViewModels
         /// </summary>
         private void DeleteAllTaskRoot(ref List<Task> taskList, Task task)
         {
+            if (task.Status != (int)TabsEnum.AllTasks)
+                DeleteTaskFromFolders(task);
             foreach (var item in taskList)
             {
                 if (item.MainTaskId == task.Id)
                 {
                     DeleteAllTaskRoot(ref taskList, item);
-                    if (item.Status != (int)TabsEnum.AllTasks)
-                        DeleteTaskFromFolders(item);
+                    if (task.Status != (int)TabsEnum.AllTasks)
+                        DeleteTaskFromFolders(task);
                     _databaseService.RemoveTaskAsync(item);
                     DeleteReferencedTabs(item);
                 }
