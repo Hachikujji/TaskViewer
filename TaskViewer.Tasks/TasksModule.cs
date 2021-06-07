@@ -1,6 +1,7 @@
 ﻿using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
+using TaskViewer.Database.Models;
 using TaskViewer.Database.Services;
 using TaskViewer.Tasks.Views;
 
@@ -17,7 +18,8 @@ namespace TaskViewer.Tasks
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<TasksWindow>();
-            containerRegistry.RegisterSingleton<IDatabaseService, DatabaseService>();
+            containerRegistry.RegisterScoped<IDatabaseService, DatabaseService>();
+            containerRegistry.RegisterScoped<TaskViewerEntities>();
         }
     }
 }

@@ -65,6 +65,9 @@ namespace TaskViewer.Tasks.ViewModels
         // Authorization username textbox field
         private string _username;
 
+        // Authorization password textbox field
+        private string _password;
+
         // Authorization error message
         private string _authorizationErrorLog;
 
@@ -98,9 +101,9 @@ namespace TaskViewer.Tasks.ViewModels
             AddTaskEvent = new DelegateCommand(AddTask);
             DeleteTaskEvent = new DelegateCommand(DeleteTask);
             DeleteTaskTabEvent = new DelegateCommand(DeleteTaskTab);
-            LogInButtonEvent = new DelegateCommand<object>(LogInButton);
+            LogInButtonEvent = new DelegateCommand(LogInButton);
             LogOutEvent = new DelegateCommand(LogOutButton);
-            RegistrationButtonEvent = new DelegateCommand<object>(RegistrationButton);
+            RegistrationButtonEvent = new DelegateCommand(RegistrationButton);
             _timerDuration = 3000;
             SelectedTabItemIndex = -1;
             SelectedListItemIndex = -1;
@@ -131,14 +134,12 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when login button pressed
         /// </summary>
-        private void LogInButton(object PasswordBox)
+        private void LogInButton()
         {
-            string password = (PasswordBox as PasswordBox)?.Password;
-            (PasswordBox as PasswordBox).Password = string.Empty;
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
                 return;
             int id;
-            if (_databaseService.IsUserPasswordCorrect(Username, password))
+            if (_databaseService.IsUserPasswordCorrect(Username, Password))
             {
                 id = _databaseService.GetUserId(Username);
                 AfterAuthorizationInitialization();
@@ -167,16 +168,15 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when registration button pressed
         /// </summary>
-        private void RegistrationButton(object PasswordBox)
+        private void RegistrationButton()
         {
-            string password = (PasswordBox as PasswordBox).Password;
-            (PasswordBox as PasswordBox).Password = string.Empty;
-            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(password))
+            Password = string.Empty;
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
                 return;
             if (_databaseService.IsUserExists(Username) == false)
             {
                 AfterAuthorizationInitialization();
-                var user = new User(Username, password);
+                var user = new User(Username, Password);
                 _databaseService.AddUserAsync(user);
                 HeaderSelectedTabIndex = 1;
                 _currentUserId = _databaseService.GetUserId(Username);
@@ -232,13 +232,9 @@ namespace TaskViewer.Tasks.ViewModels
                     var taskObject = new TaskObject(item, new ObservableCollection<TaskObject>());
                     taskObjects.Add(taskObject);
                     if (item.Status == (int)StatusEnum.Completed)
-                    {
                         TabControlTabs[(int)TabsEnum.CompletedTasks].SubTasks.Add(taskObject);
-                    }
                     if (item.Status == (int)StatusEnum.InProgress)
-                    {
                         TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks.Add(taskObject);
-                    }
                 }
             }
             foreach (var item in taskObjects)
@@ -300,9 +296,7 @@ namespace TaskViewer.Tasks.ViewModels
             foreach (var tab in TabControlTabs)
             {
                 if (task.Id == tab.Task.Id)
-                {
                     deleteTabList.Add(tab);
-                }
             }
             foreach (var delTask in deleteTabList)
                 TabControlTabs.Remove(delTask);
@@ -352,21 +346,19 @@ namespace TaskViewer.Tasks.ViewModels
         private void OpenSubTaskTab()
         {
             if (SelectedListItemIndex >= 0 && SelectedTabItemIndex >= 0)
-            {
                 TabControlTabs.Add(SelectedListItem);
-            }
         }
 
         /// <summary>
         /// Action when task was edited
         /// </summary>
-        private void UpdateTaskAfterEditing(Object GridCell)
+        private void UpdateTaskAfterEditing(object taskUI)
         {
             //if ComboBox
-            if (GridCell != null)
+            if (taskUI != null)
             {
-                TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
-                _databaseService.UpdateTaskAsync(t.Task);
+                TaskObject task = taskUI as TaskObject;
+                _databaseService.UpdateTaskAsync(task.Task);
             }
             else
                 _databaseService.UpdateTaskAsync(SelectedListItem.Task);
@@ -375,24 +367,23 @@ namespace TaskViewer.Tasks.ViewModels
         /// <summary>
         /// Action when task status was edited
         /// </summary>
-        private void UpdateTaskStatus(Object GridCell)
+        private void UpdateTaskStatus(object taskUI)
         {
-            TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
-            UpdateTaskAfterEditing(GridCell);
-            List<TaskObject> deleteList = new List<TaskObject>();
+            TaskObject task = taskUI as TaskObject;
+            UpdateTaskAfterEditing(task);
             if (SelectedComboBoxIndex != (int)TabsEnum.AllTasks)
-                TabControlTabs[SelectedComboBoxIndex].SubTasks.Remove(t);
-            if (t.Task.Status != (int)StatusEnum.Unassigned)
-                TabControlTabs[t.Task.Status].SubTasks.Add(t);
+                TabControlTabs[SelectedComboBoxIndex].SubTasks.Remove(task);
+            if (task.Task.Status != (int)StatusEnum.Unassigned)
+                TabControlTabs[task.Task.Status].SubTasks.Add(task);
         }
 
         /// <summary>
         /// Save not changed task(with old status)
         /// </summary>
-        private void SaveNotChangedTaskStatus(object GridCell)
+        private void SaveNotChangedTaskStatus(object taskUI)
         {
-            TaskObject t = ((GridCell as DataGridCell).DataContext as TaskObject);
-            SelectedComboBoxIndex = t.Task.Status;
+            TaskObject task = taskUI as TaskObject;
+            SelectedComboBoxIndex = task.Task.Status;
         }
 
         /// <summary>
@@ -425,13 +416,19 @@ namespace TaskViewer.Tasks.ViewModels
             set => SetProperty(ref _authorizationErrorLog, value);
         }
 
-        public DelegateCommand<object> LogInButtonEvent { get; }
-        public DelegateCommand<object> RegistrationButtonEvent { get; }
+        public DelegateCommand LogInButtonEvent { get; }
+        public DelegateCommand RegistrationButtonEvent { get; }
 
         public string Username
         {
             get => _username;
             set => SetProperty(ref _username, value);
+        }
+
+        public string Password
+        {
+            get => _password;
+            set => SetProperty(ref _password, value);
         }
 
         #endregion Authorization

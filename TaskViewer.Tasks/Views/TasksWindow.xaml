@@ -1,34 +1,57 @@
-﻿<UserControl x:Class="TaskViewer.Tasks.Views.TasksWindow"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:prism="http://prismlibrary.com/"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:ln="clr-namespace:TaskViewer.Tasks.Resources"
-             xmlns:data="clr-namespace:TaskViewer.Tasks.TestData"
-             mc:Ignorable="d"
-             d:DesignHeight="500" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type={x:Type data:TestViewData}}"
-             prism:ViewModelLocator.AutoWireViewModel="True"
-            TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-            Background="{DynamicResource MaterialDesignPaper}"
-            TextElement.FontSize="16"
-            FontFamily="{materialDesign:MaterialDesignFont}"
-             MinHeight="700" MinWidth="700"
-             x:Name="Window">
+﻿<UserControl
+    x:Class="TaskViewer.Tasks.Views.TasksWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:data="clr-namespace:TaskViewer.Tasks.TestData"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:ln="clr-namespace:TaskViewer.Tasks.Resources"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prism="http://prismlibrary.com/" xmlns:services="clr-namespace:TaskViewer.Tasks.Behaviors"
+    x:Name="Window"
+    MinWidth="700"
+    MinHeight="700"
+    d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
+                                     Type={x:Type data:TestViewData}}"
+    d:DesignHeight="500"
+    d:DesignWidth="800"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    Background="{DynamicResource MaterialDesignPaper}"
+    FontFamily="{materialDesign:MaterialDesignFont}"
+    TextElement.FontSize="16"
+    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+    mc:Ignorable="d">
     <UserControl.Resources>
-        <ObjectDataProvider x:Key="Resources" ObjectType="{x:Type ln:CultureResources}" MethodName="GetResourceInstance" />
-        <CollectionViewSource Source="{Binding TabControlTabs}" x:Key="TabList" />
+        <ObjectDataProvider
+            x:Key="Resources"
+            MethodName="GetResourceInstance"
+            ObjectType="{x:Type ln:CultureResources}" />
+        <CollectionViewSource x:Key="TabList" Source="{Binding TabControlTabs}" />
     </UserControl.Resources>
-    <Grid Background="LightCyan" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <!-- Authorization and Tasks tabs -->
-        <TabControl Style="{DynamicResource MaterialDesignNavigatilRailTabControl}" TabStripPlacement="Top" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectedIndex="{Binding HeaderSelectedTabIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
-            <!-- Authorization -->
-            <TabItem Header="{Binding Path=Authorization, Source={StaticResource Resources}}" Background="#ffc107" Visibility="Collapsed">
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="LightCyan">
+        <!--  Authorization and Tasks tabs  -->
+        <TabControl
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            SelectedIndex="{Binding HeaderSelectedTabIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Style="{DynamicResource MaterialDesignNavigatilRailTabControl}"
+            TabStripPlacement="Top">
+            <!--  Authorization  -->
+            <TabItem
+                Background="#ffc107"
+                Header="{Binding Path=Authorization, Source={StaticResource Resources}}"
+                Visibility="Collapsed">
                 <Grid>
-                    <StackPanel Width="auto" MinWidth="400" Height="200" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel
+                        Width="auto"
+                        Height="200"
+                        MinWidth="400"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition />
@@ -41,30 +64,73 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="300" />
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="{Binding Path=Username, Source={StaticResource Resources}}" Height="30" HorizontalAlignment="right" Margin="0 0 10 0" />
-                                <TextBox Grid.Column="1" Text="{Binding Username,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                                <Label
+                                    Grid.Column="0"
+                                    Height="30"
+                                    Margin="0,0,10,0"
+                                    HorizontalAlignment="right"
+                                    Content="{Binding Path=Username, Source={StaticResource Resources}}" />
+                                <TextBox Grid.Column="1" Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
                             <Grid Grid.Row="1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="300" />
                                 </Grid.ColumnDefinitions>
-                                <Label Grid.Column="0" Content="{Binding Path=Password, Source={StaticResource Resources}}" Height="30" HorizontalAlignment="right" Margin="0 0 10 0" />
-                                <PasswordBox Grid.Column="1" MaxLength="64" PasswordChar="*" Name="Passwordbox" />
+                                <Label
+                                    Grid.Column="0"
+                                    Height="30"
+                                    Margin="0,0,10,0"
+                                    HorizontalAlignment="right"
+                                    Content="{Binding Path=Password, Source={StaticResource Resources}}" />
+                                <PasswordBox
+                                    Name="Passwordbox"
+                                    Grid.Column="1"
+                                    MaxLength="64"
+                                    PasswordChar="*">
+                                    <i:Interaction.Behaviors>
+                                        <services:PasswordBehavior Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </i:Interaction.Behaviors>
+                                </PasswordBox>
                             </Grid>
                             <Grid Grid.Row="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Style="{DynamicResource MaterialDesignFlatMidBgButton}" Content="{Binding Path=Login, Source={StaticResource Resources}}" Command="{Binding LogInButtonEvent}"  CommandParameter="{Binding ElementName=Passwordbox}" Margin="0 5 20 0" />
-                                <Button Grid.Column="1" Style="{DynamicResource MaterialDesignFlatMidBgButton}" Content="{Binding Path=Registration, Source={StaticResource Resources}}" Command="{Binding RegistrationButtonEvent}"  CommandParameter="{Binding ElementName=Passwordbox}" Margin="20 5 0 0" />
+                                <Button
+                                    Grid.Column="0"
+                                    Margin="0,5,20,0"
+                                    Command="{Binding LogInButtonEvent}"
+                                    CommandParameter="{Binding ElementName=Passwordbox}"
+                                    Content="{Binding Path=Login, Source={StaticResource Resources}}"
+                                    Style="{DynamicResource MaterialDesignFlatMidBgButton}" />
+                                <Button
+                                    Grid.Column="1"
+                                    Margin="20,5,0,0"
+                                    Command="{Binding RegistrationButtonEvent}"
+                                    CommandParameter="{Binding ElementName=Passwordbox}"
+                                    Content="{Binding Path=Registration, Source={StaticResource Resources}}"
+                                    Style="{DynamicResource MaterialDesignFlatMidBgButton}" />
                             </Grid>
-                            <TextBlock Grid.Row="3" Text="{Binding AuthorizationErrorLog,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding AuthorizationErrorLogVisibility,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Foreground="Red" HorizontalAlignment="Center"></TextBlock>
+                            <TextBlock
+                                Grid.Row="3"
+                                HorizontalAlignment="Center"
+                                Foreground="Red"
+                                Text="{Binding AuthorizationErrorLog, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                Visibility="{Binding AuthorizationErrorLogVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
                     </StackPanel>
-                    <!-- language change comboBox -->
-                    <ComboBox Style="{DynamicResource MaterialDesignComboBox}" HorizontalAlignment="Right" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Languages}" SelectedIndex="1" SelectedItem="{Binding SelectedLanguage}" Height="26">
+                    <!--  language change comboBox  -->
+                    <ComboBox
+                        Width="120"
+                        Height="26"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding Languages}"
+                        SelectedIndex="1"
+                        SelectedItem="{Binding SelectedLanguage}"
+                        Style="{DynamicResource MaterialDesignComboBox}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
                                 <i:InvokeCommandAction Command="{Binding LanguageChangedEvent}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
@@ -72,14 +138,17 @@
                         </i:Interaction.Triggers>
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Key}"></TextBlock>
+                                <TextBlock Text="{Binding Key}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </Grid>
             </TabItem>
-            <!-- Tasks tab -->
-            <TabItem Header="{Binding Path=Tasks, Source={StaticResource Resources}}" Background="#ffc107" Visibility="Collapsed">
+            <!--  Tasks tab  -->
+            <TabItem
+                Background="#ffc107"
+                Header="{Binding Path=Tasks, Source={StaticResource Resources}}"
+                Visibility="Collapsed">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -90,7 +159,14 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <TabControl ItemsSource="{Binding DataContext.TabControlTabs, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" TabStripPlacement="Left" Grid.Row="0" SelectedIndex="{Binding DataContext.SelectedTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" SelectedItem="{Binding DataContext.SelectedTabItem, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Height="auto" Tag="{Binding ElementName=Window}">
+                        <TabControl
+                            Grid.Row="0"
+                            Height="auto"
+                            ItemsSource="{Binding DataContext.TabControlTabs, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            SelectedIndex="{Binding DataContext.SelectedTabItemIndex, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            SelectedItem="{Binding DataContext.SelectedTabItem, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            TabStripPlacement="Left"
+                            Tag="{Binding ElementName=Window}">
                             <TabControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Width="auto">
@@ -98,47 +174,69 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="auto" />
                                         </Grid.ColumnDefinitions>
-                                        <!-- TabItem text -->
+                                        <!--  TabItem text  -->
                                         <Grid Grid.Column="0">
-                                            <TextBlock MinWidth="90" Text="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                            <TextBlock
+                                                MinWidth="90"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding Task.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
-                                        <!-- Close button -->
+                                        <!--  Close button  -->
                                         <Grid Grid.Column="1">
                                             <i:Interaction.Triggers>
                                                 <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
                                                     <i:InvokeCommandAction Command="{Binding DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
-                                            <materialDesign:PackIcon Kind="Close" VerticalAlignment="Center" Width="20" Height="20" Margin="5 0 0 0" HorizontalAlignment="Right" />
+                                            <materialDesign:PackIcon
+                                                Width="20"
+                                                Height="20"
+                                                Margin="5,0,0,0"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                Kind="Close" />
                                         </Grid>
                                     </Grid>
                                 </DataTemplate>
                             </TabControl.ItemTemplate>
-                            <!-- Context menu -->
+                            <!--  Context menu  -->
                             <TabControl.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="{Binding Path=Delete, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" CommandParameter="{Binding DataContext}" />
+                                    <MenuItem
+                                        Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                        CommandParameter="{Binding DataContext}"
+                                        Header="{Binding Path=Delete, Source={StaticResource Resources}}" />
                                 </ContextMenu>
                             </TabControl.ContextMenu>
                             <TabControl.ContentTemplate>
                                 <ItemContainerTemplate>
-                                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                        <DataGrid CanUserDeleteRows="False" ItemsSource="{Binding SubTasks}" Tag="{Binding ElementName=Window}" AutoGenerateColumns="False" SelectedIndex="{Binding DataContext.SelectedListItemIndex,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" SelectedItem="{Binding DataContext.SelectedListItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
+                                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                        <DataGrid
+                                            AutoGenerateColumns="False"
+                                            CanUserDeleteRows="False"
+                                            ItemsSource="{Binding SubTasks}"
+                                            SelectedIndex="{Binding DataContext.SelectedListItemIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            SelectedItem="{Binding DataContext.SelectedListItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            Tag="{Binding ElementName=Window}">
                                             <i:Interaction.Triggers>
                                                 <i:EventTrigger EventName="RowEditEnding">
                                                     <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
                                             <DataGrid.Columns>
-                                                <!-- Task -->
-                                                <DataGridTextColumn Header="{Binding Path=Task, Source={StaticResource Resources}}" Binding="{Binding Task.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="100">
+                                                <!--  Task  -->
+                                                <DataGridTextColumn
+                                                    MinWidth="100"
+                                                    Binding="{Binding Task.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Header="{Binding Path=Task, Source={StaticResource Resources}}">
                                                     <DataGridTextColumn.ElementStyle>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="VerticalAlignment" Value="Center" />
                                                         </Style>
                                                     </DataGridTextColumn.ElementStyle>
                                                 </DataGridTextColumn>
-                                                <!-- Creation Date -->
+                                                <!--  Creation Date  -->
                                                 <DataGridTemplateColumn>
                                                     <DataGridTemplateColumn.Header>
                                                         <TextBlock Text="{Binding Path=CreationDate, Source={StaticResource Resources}}" />
@@ -146,10 +244,13 @@
                                                     <DataGridTemplateColumn.CellTemplate>
                                                         <DataTemplate>
                                                             <Grid>
-                                                                <DatePicker xml:lang="en-US" SelectedDateFormat="Short" Text="{Binding Task.CreationDate, StringFormat='dd MMM yy',Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                                                <DatePicker
+                                                                    xml:lang="en-US"
+                                                                    SelectedDateFormat="Short"
+                                                                    Text="{Binding Task.CreationDate, StringFormat='dd MMM yy', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                                     <i:Interaction.Triggers>
                                                                         <i:EventTrigger EventName="SelectedDateChanged">
-                                                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"  CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
+                                                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
                                                                         </i:EventTrigger>
                                                                     </i:Interaction.Triggers>
                                                                 </DatePicker>
@@ -157,7 +258,7 @@
                                                         </DataTemplate>
                                                     </DataGridTemplateColumn.CellTemplate>
                                                 </DataGridTemplateColumn>
-                                                <!-- Expiration Date -->
+                                                <!--  Expiration Date  -->
                                                 <DataGridTemplateColumn>
                                                     <DataGridTemplateColumn.Header>
                                                         <TextBlock Text="{Binding Path=ExpirationDate, Source={StaticResource Resources}}" />
@@ -165,7 +266,10 @@
                                                     <DataGridTemplateColumn.CellTemplate>
                                                         <DataTemplate>
                                                             <Grid>
-                                                                <DatePicker xml:lang="en-US" SelectedDateFormat="Short" Text="{Binding Task.ExpirationDate, StringFormat='dd MMM yy' ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                                                <DatePicker
+                                                                    xml:lang="en-US"
+                                                                    SelectedDateFormat="Short"
+                                                                    Text="{Binding Task.ExpirationDate, StringFormat='dd MMM yy', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                                     <i:Interaction.Triggers>
                                                                         <i:EventTrigger EventName="SelectedDateChanged">
                                                                             <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
@@ -176,7 +280,7 @@
                                                         </DataTemplate>
                                                     </DataGridTemplateColumn.CellTemplate>
                                                 </DataGridTemplateColumn>
-                                                <!-- Status -->
+                                                <!--  Status  -->
                                                 <DataGridTemplateColumn>
                                                     <DataGridTemplateColumn.Header>
                                                         <TextBlock Text="{Binding Path=Status, Source={StaticResource Resources}}" />
@@ -184,18 +288,23 @@
                                                     <DataGridTemplateColumn.CellTemplate>
                                                         <DataTemplate>
                                                             <Grid>
-                                                                <ComboBox Name="StatusComboBox" Style="{DynamicResource MaterialDesignComboBox}" ItemsSource="{Binding DataContext.Statuses, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" SelectedIndex="{Binding Task.Status,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Height="26">
+                                                                <ComboBox
+                                                                    Name="StatusComboBox"
+                                                                    Height="26"
+                                                                    ItemsSource="{Binding DataContext.Statuses, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                                    SelectedIndex="{Binding Task.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                    Style="{DynamicResource MaterialDesignComboBox}">
                                                                     <i:Interaction.Triggers>
                                                                         <i:EventTrigger EventName="SelectionChanged">
-                                                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskStatusEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
+                                                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskStatusEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
                                                                         </i:EventTrigger>
                                                                         <i:EventTrigger EventName="DropDownOpened">
-                                                                            <i:InvokeCommandAction Command="{Binding DataContext.SaveNotChangedTaskStatusEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
+                                                                            <i:InvokeCommandAction Command="{Binding DataContext.SaveNotChangedTaskStatusEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
                                                                         </i:EventTrigger>
                                                                     </i:Interaction.Triggers>
                                                                     <ComboBox.ItemTemplate>
                                                                         <DataTemplate>
-                                                                            <TextBlock Text="{Binding Key}"></TextBlock>
+                                                                            <TextBlock Text="{Binding Key}" />
                                                                         </DataTemplate>
                                                                     </ComboBox.ItemTemplate>
                                                                 </ComboBox>
@@ -206,8 +315,8 @@
                                             </DataGrid.Columns>
                                             <DataGrid.ContextMenu>
                                                 <ContextMenu>
-                                                    <MenuItem Header="{Binding Path=OpenSubTaskTab, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.OpenSubTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
-                                                    <MenuItem Header="{Binding Path=Delete, Source={StaticResource Resources}}" Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
+                                                    <MenuItem Command="{Binding PlacementTarget.Tag.DataContext.OpenSubTaskTabEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" Header="{Binding Path=OpenSubTaskTab, Source={StaticResource Resources}}" />
+                                                    <MenuItem Command="{Binding PlacementTarget.Tag.DataContext.DeleteTaskEvent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" Header="{Binding Path=Delete, Source={StaticResource Resources}}" />
                                                 </ContextMenu>
                                             </DataGrid.ContextMenu>
                                         </DataGrid>
@@ -224,9 +333,23 @@
                                         <ColumnDefinition Width="auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Path=Task, Source={StaticResource Resources}}" Grid.Column="0" Width="auto" HorizontalAlignment="Right" Margin="20 0 10 0" />
-                                    <TextBox Grid.Column="1" Width="100" Text="{Binding DataContext.AddTaskName, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
-                                    <Button Style="{DynamicResource MaterialDesignFlatAccentBgButton}"  Content="{Binding Path=AddTask, Source={StaticResource Resources}}" Grid.Column="3" Width="100" HorizontalAlignment="Right" Command="{Binding DataContext.AddTaskEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Width="auto"
+                                        Margin="20,0,10,0"
+                                        HorizontalAlignment="Right"
+                                        Text="{Binding Path=Task, Source={StaticResource Resources}}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Width="100"
+                                        Text="{Binding DataContext.AddTaskName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                                    <Button
+                                        Grid.Column="3"
+                                        Width="100"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding DataContext.AddTaskEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                        Content="{Binding Path=AddTask, Source={StaticResource Resources}}"
+                                        Style="{DynamicResource MaterialDesignFlatAccentBgButton}" />
                                 </Grid>
                             </StackPanel>
                         </Grid>
@@ -236,7 +359,11 @@
                             <DockPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Grid Height="33">
-                                        <TextBlock Text="{Binding DataContext.Username, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"></TextBlock>
+                                        <TextBlock
+                                            Padding="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding DataContext.Username, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                                     </Grid>
                                     <Grid Background="Transparent">
                                         <i:Interaction.Triggers>
@@ -245,7 +372,10 @@
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                         <Grid.ToolTip>Logout</Grid.ToolTip>
-                                        <materialDesign:PackIcon Kind="Logout" Height="30" Width="30" />
+                                        <materialDesign:PackIcon
+                                            Width="30"
+                                            Height="30"
+                                            Kind="Logout" />
                                     </Grid>
                                 </StackPanel>
                             </DockPanel>

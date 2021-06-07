@@ -20,6 +20,7 @@ namespace TaskViewer.Tasks.TestData
             TabControlTabs.Add(new TaskObject(new Task(0, 0, languages.InProgress, DateTime.Now), new ObservableCollection<TaskObject>()));
             TabControlTabs.Add(new TaskObject(new Task(0, 0, languages.Completed, DateTime.Now), new ObservableCollection<TaskObject>()));
             TabControlTabs[0].SubTasks.Add(new TaskObject(new Task(0, 0, "test", DateTime.Now, DateTime.Now.AddDays(1)), new ObservableCollection<TaskObject>()));
+            TabControlTabs[0].SubTasks.Add(new TaskObject(new Task(0, 0, "test", DateTime.Now, DateTime.Now.AddDays(1)), new ObservableCollection<TaskObject>()));
         }
     }
 }

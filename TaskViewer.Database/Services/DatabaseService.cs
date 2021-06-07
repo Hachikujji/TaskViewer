@@ -10,6 +10,13 @@ namespace TaskViewer.Database.Services
 {
     public class DatabaseService : IDatabaseService
     {
+        private readonly TaskViewerEntities _entities;
+
+        public DatabaseService(TaskViewerEntities entities)
+        {
+            _entities = entities;
+        }
+
         #region Public Methods
 
         /// <summary>
@@ -19,14 +26,8 @@ namespace TaskViewer.Database.Services
         /// <returns>true or false</returns>
         public bool IsUserExists(string username)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                var user = entities.Users.SingleOrDefault(s => s.Username == username);
-                if (user == null)
-                    return false;
-                else
-                    return true;
-            }
+            var user = _entities.Users.SingleOrDefault(s => s.Username == username);
+            return user != null;
         }
 
         /// <summary>
@@ -37,14 +38,8 @@ namespace TaskViewer.Database.Services
         /// <returns> <br>true if correct</br> <br>false if not correct</br></returns>
         public bool IsUserPasswordCorrect(string username, string password)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                var user = entities.Users.SingleOrDefault(s => s.Username == username && s.Password == password);
-                if (user == null)
-                    return false;
-                else
-                    return true;
-            }
+            var user = _entities.Users.SingleOrDefault(s => s.Username == username && s.Password == password);
+            return user != null;
         }
 
         /// <summary>
@@ -54,14 +49,11 @@ namespace TaskViewer.Database.Services
         /// <returns><br>User.id if user found</br> <br>-1 if user not found</br> </returns>
         public int GetUserId(string username)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                var user = entities.Users.SingleOrDefault(s => s.Username == username);
-                if (user == null)
-                    return -1;
-                else
-                    return user.Id;
-            }
+            var user = _entities.Users.SingleOrDefault(s => s.Username == username);
+            if (user == null)
+                return -1;
+            else
+                return user.Id;
         }
 
         /// <summary>
@@ -71,11 +63,8 @@ namespace TaskViewer.Database.Services
         /// <returns></returns>
         public async System.Threading.Tasks.Task AddUserAsync(User user)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                entities.Users.Add(user);
-                await entities.SaveChangesAsync();
-            }
+            _entities.Users.Add(user);
+            await _entities.SaveChangesAsync();
         }
 
         /// <summary>
@@ -86,11 +75,8 @@ namespace TaskViewer.Database.Services
         public async Task<List<Models.Task>> GetTaskListAsync(int id)
         {
             var list = new List<Models.Task>();
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                list = await entities.Tasks.Where(t => t.UserId == id).ToListAsync().ConfigureAwait(false);
-                return list;
-            }
+            list = await _entities.Tasks.Where(t => t.UserId == id).ToListAsync().ConfigureAwait(false);
+            return list;
         }
 
         /// <summary>
@@ -99,11 +85,8 @@ namespace TaskViewer.Database.Services
         /// <param name="task"></param>
         public async System.Threading.Tasks.Task AddTaskAsync(Models.Task task)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                entities.Tasks.Add(task);
-                await entities.SaveChangesAsync();
-            }
+            _entities.Tasks.Add(task);
+            await _entities.SaveChangesAsync();
         }
 
         /// <summary>
@@ -113,12 +96,9 @@ namespace TaskViewer.Database.Services
         ///
         public async System.Threading.Tasks.Task RemoveTaskAsync(Models.Task task)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
-            {
-                entities.Tasks.Attach(task);
-                entities.Tasks.Remove(task);
-                await entities.SaveChangesAsync();
-            }
+            _entities.Tasks.Attach(task);
+            _entities.Tasks.Remove(task);
+            await _entities.SaveChangesAsync();
         }
 
         /// <summary>
@@ -127,14 +107,11 @@ namespace TaskViewer.Database.Services
         /// <param name="task"></param>
         public async System.Threading.Tasks.Task UpdateTaskAsync(Models.Task task)
         {
-            using (TaskViewerEntities entities = new TaskViewerEntities())
+            var result = _entities.Tasks.SingleOrDefault(b => b.Id == task.Id);
+            if (result != null)
             {
-                var result = entities.Tasks.SingleOrDefault(b => b.Id == task.Id);
-                if (result != null)
-                {
-                    entities.Entry(result).CurrentValues.SetValues(task);
-                    await entities.SaveChangesAsync();
-                }
+                _entities.Entry(result).CurrentValues.SetValues(task);
+                await _entities.SaveChangesAsync();
             }
         }
 
