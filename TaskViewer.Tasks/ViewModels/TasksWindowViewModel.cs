@@ -209,7 +209,6 @@ namespace TaskViewer.Tasks.ViewModels
             if ((SelectedTabItemIndex == 0 || SelectedTabItemIndex > _mainTabsCount - 1) && !string.IsNullOrWhiteSpace(AddTaskName))
             {
                 int mainTaskId;
-
                 mainTaskId = SelectedTabItem.Task.Id;
                 var task = new Task(_currentUserId, mainTaskId, AddTaskName, DateTime.Now);
                 _databaseService.AddTaskAsync(task);
@@ -226,7 +225,6 @@ namespace TaskViewer.Tasks.ViewModels
         private void ConvertTaskListToTaskObjectObservableCol(ref List<Task> taskList, ObservableCollection<TaskObject> taskObjects, int mainTaskId = 0)
         {
             foreach (var item in taskList)
-            {
                 if (item.MainTaskId == mainTaskId)
                 {
                     var taskObject = new TaskObject(item, new ObservableCollection<TaskObject>());
@@ -236,11 +234,8 @@ namespace TaskViewer.Tasks.ViewModels
                     if (item.Status == (int)StatusEnum.InProgress)
                         TabControlTabs[(int)TabsEnum.InProgressTasks].SubTasks.Add(taskObject);
                 }
-            }
             foreach (var item in taskObjects)
-            {
                 ConvertTaskListToTaskObjectObservableCol(ref taskList, item.SubTasks, item.Task.Id);
-            }
         }
 
         /// <summary>
