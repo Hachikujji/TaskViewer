@@ -221,7 +221,7 @@
                                             Tag="{Binding ElementName=Window}">
                                             <i:Interaction.Triggers>
                                                 <i:EventTrigger EventName="RowEditEnding">
-                                                    <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
+                                                    <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
                                             <DataGrid.Columns>
@@ -272,7 +272,7 @@
                                                                     Text="{Binding Task.ExpirationDate, StringFormat='dd MMM yy', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                                     <i:Interaction.Triggers>
                                                                         <i:EventTrigger EventName="SelectedDateChanged">
-                                                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
+                                                                            <i:InvokeCommandAction Command="{Binding DataContext.UpdateTaskAfterEditingEvent, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridCell}}}" />
                                                                         </i:EventTrigger>
                                                                     </i:Interaction.Triggers>
                                                                 </DatePicker>
